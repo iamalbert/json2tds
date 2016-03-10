@@ -9,17 +9,16 @@
     #include "token.h"
 
 
-    JsonValue * json;
 
     extern int yylex(YYSTYPE * yylval, yyscan_t  scanner );
-    extern void yyerror(yyscan_t scanner, const char *);
+    extern void yyerror(yyscan_t scanner, JsonState*, const char *);
 
 %}
 
 %define parse.error verbose
 %pure-parser
 %lex-param {void * scanner}
-%parse-param {void * scanner}
+%parse-param {void * scanner} {JsonState * state}
 
 /*
 %define api.pure full 
@@ -58,9 +57,9 @@
 start: collection 
 
 collection: array  { 
-        json = $1;
+        state->value = $1;
     }| object {
-        json = $1;
+        state->value = $1;
     }
 ;
 array: T_LEFT_BRAK elements T_RIGHT_BRAK { 
@@ -119,6 +118,13 @@ pair: T_STRING T_COLON element {
 
 //extern int yylex(YYSTYPE*);
 
+void yyerror(yyscan_t scanner, JsonState *state, const char * err ) {
+	char msg[BUFSIZ];
+	sprintf(msg, "Line : %d, Token: %s, Error: %s\n", 
+		yyget_lineno(scanner), yyget_text(scanner), err );
+	throw JsonException(msg);
+};
+
 int main(){
     JsonState state;
     //return yyparse( (void*) &state );
@@ -126,14 +132,14 @@ int main(){
     yyscan_t scanner;
 
     yylex_init(&scanner);
-    int ret = yyparse(scanner);
-    yylex_destroy(scanner);
-    //yyparse();
-	if ( ret == 0 ){
-		json->print(std::cout);
+	try{
+		yyparse(scanner, &state);
+		state.getJsonValue()->print(std::cout);
 		std::cout << "\n";
-		delete json;
+	}catch( const JsonException & e ){
+		std::cerr << e.what();
 	}
-    //std::cout << *json << "\n";
+    yylex_destroy(scanner);
+
 };
 

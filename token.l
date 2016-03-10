@@ -69,9 +69,4 @@ null     { TOKEN(T_NULL); };
 
 %%
 
-void yyerror(yyscan_t scanner, const char * err) {
-    fprintf(stderr, "Line : %d\nToken: %s\nError: %s\n", 
-		yyget_lineno(scanner), yyget_text(scanner),
-		err );
-};
 

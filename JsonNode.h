@@ -1,21 +1,23 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <stdexcept>
 
 struct JsonValue {
 	JsonValue * next;
 	JsonValue * member;
 	JsonValue():
-		next(   (JsonValue*) 0 ) ,
-		member( (JsonValue*) 0 ) 
+		next( nullptr ) , member( nullptr ) 
 	{}
 
     virtual ~JsonValue() {
 		if( next ){
 			delete next;
+			next = nullptr
 		}
 		if( member ){
 			delete member;
+			member = nullptr;
 		}
 	}
 	virtual std::ostream & print( std::ostream & os ) const {
@@ -32,8 +34,14 @@ struct JsonPair : public JsonValue {
 		key(k), value(v) {}
 
 	~JsonPair(){
-		if( key ) delete key;
-		if( value ) delete value;
+		if( key ) {
+			delete key;
+			key = nullptr;
+		}
+		if( value ) {
+			delete value;
+			value = nullptr;
+		}
 	}
 
 	virtual std::ostream & print( std::ostream & os ) const {
@@ -104,6 +112,25 @@ struct JsonNull : public JsonValue {
 
 
 struct JsonState {
-	JsonState(){ }
+	JsonValue * value;
+
+	JsonState() : value(nullptr){
+	}
+	~JsonState(){
+		if( value ){
+			delete value;
+			value = nullptr;
+		}
+	}
+	JsonValue * getJsonValue() const {
+		return value;
+	}
 };
 
+
+struct JsonException : public std::runtime_error {
+	JsonException( const std::string & error ) :
+		std::runtime_error( error ){}
+	JsonException( const char * error ) :
+		std::runtime_error( error ){}
+};

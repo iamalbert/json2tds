@@ -1,11 +1,16 @@
 CXX := clang++
-CXXFLAGS := -g
+CXXFLAGS := -Wall -pedantic -Wno-deprecated-register -g -std=c++11
 
 all: prog
 
-prog: parser.cpp token.cpp
+prog: parser.o token.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ -ll
 
+%.o: %.cpp token.h parser.hpp
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
+
+
+token.h: token.cpp
 token.cpp: token.l parser.hpp
 	flex -F --header-file=token.h -o $@ $<
 
