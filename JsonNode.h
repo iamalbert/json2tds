@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <stdexcept>
+#include <deque>
 
 struct JsonValue {
 	JsonValue * next;
@@ -10,10 +11,15 @@ struct JsonValue {
 		next( nullptr ) , member( nullptr ) 
 	{}
 
+	virtual void breakLinks(){
+		next = nullptr;
+		member = nullptr;
+	}
+
     virtual ~JsonValue() {
 		if( next ){
 			delete next;
-			next = nullptr
+			next = nullptr;
 		}
 		if( member ){
 			delete member;
@@ -29,24 +35,19 @@ struct JsonString;
 
 struct JsonPair : public JsonValue {
 	std::string* key;
-    JsonValue*  value;
-	JsonPair(std::string* k, JsonValue * v):
-		key(k), value(v) {}
+	JsonPair(std::string* k):
+		key(k) {}
 
 	~JsonPair(){
 		if( key ) {
 			delete key;
 			key = nullptr;
 		}
-		if( value ) {
-			delete value;
-			value = nullptr;
-		}
 	}
 
 	virtual std::ostream & print( std::ostream & os ) const {
 		os << "\"" << *key << "\"=>";
-		value->print(os);
+		member->print(os);
 		return os;
 	}
 };
@@ -83,7 +84,10 @@ struct JsonString : public JsonValue {
 	JsonString( std::string *s) : value(s) {
 	}
 	~JsonString(){
-		if(value) delete value;
+		if(value){
+			delete value;
+			value = nullptr;
+		}
 	}
 
 	virtual std::ostream & print( std::ostream & os ) const {
@@ -114,6 +118,7 @@ struct JsonNull : public JsonValue {
 struct JsonState {
 	JsonValue * value;
 
+	std::deque<JsonValue*> objList;
 	JsonState() : value(nullptr){
 	}
 	~JsonState(){
@@ -122,8 +127,27 @@ struct JsonState {
 			value = nullptr;
 		}
 	}
+
+	template<class T, class ...Args>
+	T* newObject( Args&& ... args ){
+		static_assert( std::is_base_of< JsonValue, T >::value, 
+				"must derived from JsonValue");
+		T* obj = new T( std::forward<Args>(args)... );
+		objList.push_back(obj);
+		return obj;
+	}
+
 	JsonValue * getJsonValue() const {
 		return value;
+	}
+
+	void free(){
+		for( auto ptr : objList ){
+			ptr->breakLinks();
+			delete ptr;
+		}
+		objList.clear();
+		value = nullptr;
 	}
 };
 

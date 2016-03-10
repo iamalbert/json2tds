@@ -63,30 +63,30 @@ collection: array  {
     }
 ;
 array: T_LEFT_BRAK elements T_RIGHT_BRAK { 
-        $$ = new JsonArray();
+        $$ = state->newObject<JsonArray>();
         $$->member = $2;
     }| T_LEFT_BRAK T_RIGHT_BRAK { 
-        $$ = new JsonArray();
+        $$ = state->newObject<JsonArray>();
     }
 ;
 elements: element {
-            $$ = $1;
+		$$ = $1;
     }| element T_COMMA elements {
-            $1->next = $3;
-            $$= $1;
+		$1->next = $3;
+		$$= $1;
     }
 ;
 element: T_STRING {
         //std::cout << "STRING:" << *$1.strval << "\n";
-        $$ = new JsonString($1);
+        $$ = state->newObject<JsonString>($1);
     }| T_NUMBER {
-        $$ = new JsonNumber($1);
+        $$ = state->newObject<JsonNumber>($1);
     }| T_TRUE {
-        $$ = new JsonBoolean(true);
+        $$ = state->newObject<JsonBoolean>(true);
     }| T_FALSE {
-        $$ = new JsonBoolean(false);
+        $$ = state->newObject<JsonBoolean>(false);
     }| T_NULL {
-        $$ = new JsonNull();
+        $$ = state->newObject<JsonNull>();
     }| array {
         $$ = $1;
     }| object {
@@ -94,10 +94,10 @@ element: T_STRING {
     }
 ;
 object: T_LEFT_CUR T_RIGHT_CUR {
-        $$= new JsonObject();
+		$$ = state->newObject<JsonObject>();
       }
       | T_LEFT_CUR members T_RIGHT_CUR { 
-        $$= new JsonObject();
+		$$ = state->newObject<JsonObject>();
         $$->member = $2;
       }
 ;
@@ -110,7 +110,8 @@ members: pair T_COMMA members {
        }
 ;
 pair: T_STRING T_COLON element {
-    $$ = new JsonPair($1, $3);
+    $$ = state->newObject<JsonPair>($1);
+	$$->member =  $3;
 }
 ;
 
@@ -120,7 +121,7 @@ pair: T_STRING T_COLON element {
 
 void yyerror(yyscan_t scanner, JsonState *state, const char * err ) {
 	char msg[BUFSIZ];
-	sprintf(msg, "Line : %d, Token: %s, Error: %s\n", 
+	sprintf(msg, "Line: %d, Token: %s, Error: %s\n", 
 		yyget_lineno(scanner), yyget_text(scanner), err );
 	throw JsonException(msg);
 };
@@ -136,10 +137,10 @@ int main(){
 		yyparse(scanner, &state);
 		state.getJsonValue()->print(std::cout);
 		std::cout << "\n";
-	}catch( const JsonException & e ){
+	}catch( std::exception & e ){
 		std::cerr << e.what();
+		state.free();
 	}
     yylex_destroy(scanner);
-
 };
 
