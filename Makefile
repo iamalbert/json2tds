@@ -3,7 +3,7 @@ CXXFLAGS := -Wall -pedantic -Wno-deprecated-register -O2 -std=c++11
 
 all: prog
 
-prog: parser.o token.o
+prog: parser.o token.o JsonNode.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ -ll
 
 %.o: %.cpp token.h parser.hpp

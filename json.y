@@ -124,7 +124,7 @@ void yyerror(yyscan_t scanner, JsonState *state, const char * err ) {
 	sprintf(msg, "Line: %d, Token: %s, Error: %s\n", 
 		yyget_lineno(scanner), yyget_text(scanner), err );
 	throw JsonException(msg);
-};
+}
 
 
 JsonValue* parse_json( FILE * fp ){
@@ -159,5 +159,5 @@ int main(int argc, char **argv){
 		}
 		delete json;
 	}
-};
+}
 

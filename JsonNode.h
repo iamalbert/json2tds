@@ -1,3 +1,6 @@
+#ifndef JSON_NODE_H
+#define JSON_NODE_H
+
 #include <vector>
 #include <string>
 #include <iostream>
@@ -7,122 +10,62 @@
 struct JsonValue {
 	JsonValue * next;
 	JsonValue * member;
-	JsonValue():
-		next( nullptr ) , member( nullptr ) 
-	{}
+	JsonValue();
 
-	virtual void breakLinks(){
-		next = nullptr;
-		member = nullptr;
-	}
+    ~JsonValue();
 
-    virtual ~JsonValue() {
-		if( next ){
-			delete next;
-			next = nullptr;
-		}
-		if( member ){
-			delete member;
-			member = nullptr;
-		}
-	}
-	virtual std::ostream & print( std::ostream & os ) const {
-		return os << "[JsonValue]";
-	}
+	void breakLinks();
+	std::ostream & print( std::ostream & os ) const;
 };
 
 struct JsonString;
 
 struct JsonPair : public JsonValue {
 	std::string* key;
-	JsonPair(std::string* k):
-		key(k) {}
+	JsonPair(std::string* k);
 
-	~JsonPair(){
-		if( key ) {
-			delete key;
-			key = nullptr;
-		}
-	}
+	~JsonPair();
 
-	virtual std::ostream & print( std::ostream & os ) const {
-		os << "\"" << *key << "\"=>";
-		member->print(os);
-		return os;
-	}
+	std::ostream & print( std::ostream & os ) const;
 };
 
 
 struct JsonObject : public JsonValue {
-	virtual std::ostream & print( std::ostream & os ) const {
-		os << "{JsonObject:";
-		for( JsonValue * ele = member; ele; ele = ele->next ){
-			os << " " ;
-			ele->print(os);
-		}
-		os << "}";
-		return os;
-	}
-
+	std::ostream & print( std::ostream & os ) const;
 };
 
 struct JsonArray : public JsonValue {
-	virtual std::ostream & print( std::ostream & os ) const {
-		os << "[JsonArray:";
-		for( JsonValue * ele = member; ele; ele = ele->next ){
-			os << " " ;
-			ele->print(os);
-		}
-		os << "]";
-		return os;
-	}
-
+	std::ostream & print( std::ostream & os ) const ;
 };
 
 struct JsonString : public JsonValue {
     std::string *value;
-	JsonString( std::string *s) : value(s) {
-	}
-	~JsonString(){
-		if(value){
-			delete value;
-			value = nullptr;
-		}
-	}
+	JsonString( std::string *s);
+	~JsonString();
 
-	virtual std::ostream & print( std::ostream & os ) const {
-		return os << "[JsonString: \"" << *value << "\"]";
-	}
+	std::ostream & print( std::ostream & os ) const ;
+
 };
 struct JsonNumber : public JsonValue {
-    JsonNumber(double v) : value(v) {}
     double value;
-	virtual std::ostream & print( std::ostream & os ) const {
-		return os << "[JsonNumber: " << value << "]";
-	}
+    JsonNumber(double v);
+	std::ostream & print( std::ostream & os ) const ;
 };
 struct JsonBoolean : public JsonValue {
-	JsonBoolean(bool b): value(b) {}
     bool value;
-	virtual std::ostream & print( std::ostream & os ) const {
-		return os << "[JsonBoolean: " << (value?"true":"false") << "]";
-	}
+	JsonBoolean(bool b);
+	std::ostream & print( std::ostream & os ) const ;
 };
 struct JsonNull : public JsonValue {
-	virtual std::ostream & print( std::ostream & os ) const {
-		return os << "[JsonNull]";
-	}
+	std::ostream & print( std::ostream & os ) const ;
 };
 
 
 struct JsonState {
 	JsonValue * value;
-
 	std::deque<JsonValue*> objList;
-	JsonState() : value(nullptr){
-	}
-	~JsonState(){
-	}
+
+	JsonState();
 
 	template<class T, class ...Args>
 	T* newObject( Args&& ... args ){
@@ -133,24 +76,17 @@ struct JsonState {
 		return obj;
 	}
 
-	JsonValue * getJsonValue() const {
-		return value;
-	}
+	JsonValue * getJsonValue() const ;
 
-	void free(){
-		for( auto ptr : objList ){
-			ptr->breakLinks();
-			delete ptr;
-		}
-		objList.clear();
-		value = nullptr;
-	}
+	void free();
+
 };
 
 
 struct JsonException : public std::runtime_error {
-	JsonException( const std::string & error ) :
-		std::runtime_error( error ){}
-	JsonException( const char * error ) :
-		std::runtime_error( error ){}
+	template<class ...Args>
+	JsonException(Args&& ... args ) :
+		std::runtime_error( std::forward<Args>(args)... ) {}
 };
+
+#endif
