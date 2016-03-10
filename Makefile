@@ -3,14 +3,11 @@ CXXFLAGS := -g
 
 all: prog
 
-prog: parser.o token.o
+prog: parser.cpp token.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $^ -ll
 
-%.o: %.cpp
-	$(CXX) -c $(CXXFLAGS) -o $@ $<
-
 token.cpp: token.l parser.hpp
-	flex -F -o $@ $<
+	flex -F --header-file=token.h -o $@ $<
 
 parser.hpp: parser.cpp
 parser.cpp: json.y

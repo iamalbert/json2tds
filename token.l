@@ -13,6 +13,10 @@
 
 %}
 
+%option yylineno
+%option reentrant
+%option bison-bridge
+
 DIGIT1to9   [1-9]
 DIGIT       [0-9]
 DIGITS      {DIGIT}+
@@ -37,12 +41,12 @@ CHARS           {CHAR}+
 
 {DBL_QUOTE}{DBL_QUOTE} |
 {DBL_QUOTE}{CHARS}{DBL_QUOTE} { 
-	yylval.strval = new std::string(yytext+1, yyleng-2);
+	yylval->strval = new std::string(yytext+1, yyleng-2);
     TOKEN(T_STRING);
 };
 
 {NUMBER} { 
-	yylval.numval = atof(yytext);
+	yylval->numval = atof(yytext);
 	TOKEN(T_NUMBER); 
 };
 
@@ -60,8 +64,14 @@ null     { TOKEN(T_NULL); };
 ":"      { TOKEN(T_COLON); };
 
 [ \t\n\r]+ /* ignore whitespace */;
-.        {
-            printf("Unexpected: %c\nExiting...\n",*yytext);
-}
+
+.       { TOKEN(T_UNIDENTIFY); }
 
 %%
+
+void yyerror(yyscan_t scanner, const char * err) {
+    fprintf(stderr, "Line : %d\nToken: %s\nError: %s\n", 
+		yyget_lineno(scanner), yyget_text(scanner),
+		err );
+};
+
