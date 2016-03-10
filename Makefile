@@ -1,5 +1,5 @@
-CXX := clang++
-CXXFLAGS := -Wall -pedantic -Wno-deprecated-register -g -std=c++11
+CXX := g++
+CXXFLAGS := -Wall -pedantic -Wno-deprecated-register -O2 -std=c++11
 
 all: prog
 

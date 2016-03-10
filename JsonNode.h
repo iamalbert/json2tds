@@ -122,10 +122,6 @@ struct JsonState {
 	JsonState() : value(nullptr){
 	}
 	~JsonState(){
-		if( value ){
-			delete value;
-			value = nullptr;
-		}
 	}
 
 	template<class T, class ...Args>

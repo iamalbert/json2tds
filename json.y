@@ -126,21 +126,38 @@ void yyerror(yyscan_t scanner, JsonState *state, const char * err ) {
 	throw JsonException(msg);
 };
 
-int main(){
-    JsonState state;
-    //return yyparse( (void*) &state );
 
+JsonValue* parse_json( FILE * fp ){
+    JsonState state;
     yyscan_t scanner;
 
     yylex_init(&scanner);
 	try{
+		yyset_in( fp, scanner );
 		yyparse(scanner, &state);
-		state.getJsonValue()->print(std::cout);
-		std::cout << "\n";
+		//state.getJsonValue()->print(std::cerr);
 	}catch( std::exception & e ){
 		std::cerr << e.what();
 		state.free();
 	}
     yylex_destroy(scanner);
+
+	return state.getJsonValue();
+}
+
+
+
+int main(int argc, char **argv){
+	for( int i = 1; i < argc; i ++ ){
+		FILE * fp = fopen( argv[i], "rb" );
+		JsonValue * json = parse_json(fp);
+		fclose(fp);
+
+		if( json ){
+			//json->print(std::cout); std::cout << "\n";
+		}else{
+		}
+		delete json;
+	}
 };
 
