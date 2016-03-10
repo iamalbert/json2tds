@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <exception>
 #include <stdexcept>
 #include <deque>
 
@@ -16,6 +17,7 @@ struct JsonValue {
 
 	virtual void breakLinks();
 	virtual std::ostream & print( std::ostream & os ) const;
+	virtual std::ostream & printJson( std::ostream & os ) const;
 };
 
 struct JsonString;
@@ -26,15 +28,18 @@ struct JsonPair : public JsonValue {
 
 	virtual ~JsonPair();
 	virtual std::ostream & print( std::ostream & os ) const;
+	virtual std::ostream & printJson( std::ostream & os ) const;
 };
 
 
 struct JsonObject : public JsonValue {
 	virtual std::ostream & print( std::ostream & os ) const;
+	virtual std::ostream & printJson( std::ostream & os ) const;
 };
 
 struct JsonArray : public JsonValue {
 	virtual std::ostream & print( std::ostream & os ) const ;
+	virtual std::ostream & printJson( std::ostream & os ) const;
 };
 
 struct JsonString : public JsonValue {
@@ -43,20 +48,24 @@ struct JsonString : public JsonValue {
 	~JsonString();
 
 	virtual std::ostream & print( std::ostream & os ) const ;
+	virtual std::ostream & printJson( std::ostream & os ) const;
 
 };
 struct JsonNumber : public JsonValue {
     double value;
     JsonNumber(double v);
 	virtual std::ostream & print( std::ostream & os ) const ;
+	virtual std::ostream & printJson( std::ostream & os ) const;
 };
 struct JsonBoolean : public JsonValue {
     bool value;
 	JsonBoolean(bool b);
 	virtual std::ostream & print( std::ostream & os ) const ;
+	virtual std::ostream & printJson( std::ostream & os ) const;
 };
 struct JsonNull : public JsonValue {
 	virtual std::ostream & print( std::ostream & os ) const ;
+	virtual std::ostream & printJson( std::ostream & os ) const;
 };
 
 
