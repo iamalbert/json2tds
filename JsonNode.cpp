@@ -125,3 +125,5 @@ void JsonState::free(){
 	objList.clear();
 	value = nullptr;
 }
+
+

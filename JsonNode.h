@@ -12,10 +12,10 @@ struct JsonValue {
 	JsonValue * member;
 	JsonValue();
 
-    ~JsonValue();
+    virtual ~JsonValue();
 
-	void breakLinks();
-	std::ostream & print( std::ostream & os ) const;
+	virtual void breakLinks();
+	virtual std::ostream & print( std::ostream & os ) const;
 };
 
 struct JsonString;
@@ -24,18 +24,17 @@ struct JsonPair : public JsonValue {
 	std::string* key;
 	JsonPair(std::string* k);
 
-	~JsonPair();
-
-	std::ostream & print( std::ostream & os ) const;
+	virtual ~JsonPair();
+	virtual std::ostream & print( std::ostream & os ) const;
 };
 
 
 struct JsonObject : public JsonValue {
-	std::ostream & print( std::ostream & os ) const;
+	virtual std::ostream & print( std::ostream & os ) const;
 };
 
 struct JsonArray : public JsonValue {
-	std::ostream & print( std::ostream & os ) const ;
+	virtual std::ostream & print( std::ostream & os ) const ;
 };
 
 struct JsonString : public JsonValue {
@@ -43,21 +42,21 @@ struct JsonString : public JsonValue {
 	JsonString( std::string *s);
 	~JsonString();
 
-	std::ostream & print( std::ostream & os ) const ;
+	virtual std::ostream & print( std::ostream & os ) const ;
 
 };
 struct JsonNumber : public JsonValue {
     double value;
     JsonNumber(double v);
-	std::ostream & print( std::ostream & os ) const ;
+	virtual std::ostream & print( std::ostream & os ) const ;
 };
 struct JsonBoolean : public JsonValue {
     bool value;
 	JsonBoolean(bool b);
-	std::ostream & print( std::ostream & os ) const ;
+	virtual std::ostream & print( std::ostream & os ) const ;
 };
 struct JsonNull : public JsonValue {
-	std::ostream & print( std::ostream & os ) const ;
+	virtual std::ostream & print( std::ostream & os ) const ;
 };
 
 
@@ -88,5 +87,7 @@ struct JsonException : public std::runtime_error {
 	JsonException(Args&& ... args ) :
 		std::runtime_error( std::forward<Args>(args)... ) {}
 };
+
+JsonValue * parse_json( FILE * );
 
 #endif

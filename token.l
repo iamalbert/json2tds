@@ -68,5 +68,3 @@ null     { TOKEN(T_NULL); };
 .       { TOKEN(T_UNIDENTIFY); }
 
 %%
-
-

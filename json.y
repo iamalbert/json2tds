@@ -126,7 +126,6 @@ void yyerror(yyscan_t scanner, JsonState *state, const char * err ) {
 	throw JsonException(msg);
 }
 
-
 JsonValue* parse_json( FILE * fp ){
     JsonState state;
     yyscan_t scanner;
@@ -147,6 +146,7 @@ JsonValue* parse_json( FILE * fp ){
 
 
 
+/*
 int main(int argc, char **argv){
 	for( int i = 1; i < argc; i ++ ){
 		FILE * fp = fopen( argv[i], "rb" );
@@ -161,3 +161,4 @@ int main(int argc, char **argv){
 	}
 }
 
+*/
