@@ -3,10 +3,12 @@
 JsonValue::JsonValue():
 	next( nullptr ) , member( nullptr ) 
 {}
+
 void JsonValue::breakLinks(){
 	next = nullptr;
 	member = nullptr;
 }
+
 JsonValue::~JsonValue() {
 	if( next ){
 		delete next;
@@ -23,16 +25,9 @@ std::ostream & JsonValue::print( std::ostream & os ) const {
 std::ostream & JsonValue::printJson( std::ostream & os ) const {
     throw std::runtime_error("printJson this node should be overriden");
 }
+
 int JsonValue::toLuaObject(LS){
     throw std::runtime_error("toLuaObject this node should be overriden");
-}
-int JsonValue::asLuaObject(LS){
-    int old_stack_size = lua_gettop(L);
-    this->toLuaObject(L);
-    int new_stack_size = lua_gettop(L);
-
-    assert( old_stack_size +1 == new_stack_size );
-    return 1;
 }
 
 
@@ -55,6 +50,44 @@ std::ostream & JsonPair::printJson( std::ostream & os ) const {
 	member->printJson(os);
     return os;
 }
+int JsonPair::toLuaObject(LS){
+    member->toLuaObject(L);
+    lua_setfield(L, -2, key->c_str() );
+    return 1;
+}
+
+
+
+std::ostream & JsonObject::print( std::ostream & os ) const {
+	os << "{JsonObject:";
+	for( JsonValue * ele = member; ele; ele = ele->next ){
+		os << " " ;
+		ele->print(os);
+	}
+	os << "}";
+	return os;
+}
+std::ostream & JsonObject::printJson( std::ostream & os ) const {
+	os << "{";
+	for( JsonValue * ele = member; ele; ele = ele->next ){
+		ele->printJson(os);
+        if( ele->next ) os << ",";
+	}
+	os << "}";
+	return os;
+}
+int JsonObject::toLuaObject(LS){
+    lua_newtable(L);
+	for( JsonPair* ele = (JsonPair*)member; ele; 
+            ele = (JsonPair*)ele->next )
+    {
+		ele->member->toLuaObject(L);
+        lua_setfield(L, -2, ele->key->c_str() );
+    }
+    return 1;
+}
+
+
 
 
 
@@ -80,8 +113,10 @@ std::ostream & JsonArray:: print( std::ostream & os ) const {
 }
 int JsonArray::toLuaObject(LS){
     lua_newtable(L);
-	for( JsonValue * ele = member; ele; ele = ele->next ){
-		ele->toLuaObject(L);
+    int idx = 1;
+	for( JsonValue *ele = member; ele; ele = ele->next ){
+        ele->toLuaObject(L);
+        lua_rawseti(L, -2, idx );
     }
     return 1;
 }
@@ -100,7 +135,8 @@ std::ostream & JsonString::print( std::ostream & os ) const {
 std::ostream & JsonString::printJson( std::ostream & os ) const {
 	return os << "\"" << *value << "\"";
 }
-int JsonString::toLuaObject(LS){
+int JsonString::toLuaObject(LS)
+{
     lua_pushlstring(L, value->data(), value->length() );
     return 1;
 }
@@ -114,8 +150,9 @@ std::ostream & JsonNumber::print( std::ostream & os ) const {
 std::ostream & JsonNumber::printJson( std::ostream & os ) const {
 	return os << value;
 }
-int JsonNumber::toLuaObject(LS){
-    lua_pushnumber(L, value );
+int JsonNumber::toLuaObject(LS)
+{
+    lua_pushnumber(L, value);
     return 1;
 }
 
@@ -143,8 +180,8 @@ std::ostream & JsonNull::printJson( std::ostream & os ) const {
 	return os << "null";
 }
 int JsonNull::toLuaObject(LS){
-     lua_pushnil(L);
-     return 1;
+    lua_pushnil(L);
+    return 1;
 }
 
 

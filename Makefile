@@ -1,18 +1,22 @@
 CXX := clang++
+LUA_HOME:=/home/wlzhuang/torch/install
+
 CXXFLAGS := -Wall -pedantic -Wno-deprecated-register -O2 -std=c++11
-CXXFLAGS := $(CXXFLAGS) -fpic -I/home/wlzhuang/torch/install/include
+CXXFLAGS := $(CXXFLAGS) -I$(LUA_HOME)/include
 
-all: json2tds.so
+all: json2tds.so testcpp
 
-json2tds.so: json2tds.o parser.o token.o JsonNode.o
-	$(CXX) $(CXXFLAGS) -shared -o $@ $^ -ll
+json2tds.so: json2tds.cpp parser.o token.o JsonNode.o
+	$(CXX) $(CXXFLAGS) -fPIC -shared -o $@ $^ -ll
 
+testcpp: testcpp.o parser.o token.o JsonNode.o
+	$(CXX) $(CXXFLAGS) -o $@ $^ -L$(LUA_HOME)/lib -ll -lluajit
 
 json2tds.o: json2tds.cpp
-	$(CXX) -c $(CXXFLAGS)  -o $@ $^
+	$(CXX) -fPIC -shared -c $(CXXFLAGS)  -o $@ $^
 
 %.o: %.cpp token.h parser.hpp
-	$(CXX) -c $(CXXFLAGS) -o $@ $<
+	$(CXX) -fPIC -shared -c $(CXXFLAGS) -o $@ $<
 
 
 token.h: token.cpp
