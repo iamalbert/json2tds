@@ -28,7 +28,14 @@ std::ostream & JsonValue::printJson( std::ostream & os ) const {
 int JsonValue::toLuaObject(LS){
     throw std::runtime_error("toLuaObject this node should be overriden");
 }
-    int asLuaObject(LS);
+
+int JsonValue::asLuaObject(LS){
+    int old_stack_size = lua_gettop(L);
+    this->toLuaObject(L);
+    int new_stack_size = lua_gettop(L);
+    assert( old_stack_size + 1 == new_stack_size );
+    return 1;
+}
 
 JsonPair::JsonPair(std::string* k):
 	key(k) {}
@@ -80,7 +87,7 @@ int JsonObject::toLuaObject(LS){
 	for( JsonPair* ele = (JsonPair*)member; ele; 
             ele = (JsonPair*)ele->next )
     {
-		ele->member->toLuaObject(L);
+		ele->member->asLuaObject(L);
         lua_setfield(L, -2, ele->key->c_str() );
     }
     return 1;
@@ -114,7 +121,7 @@ int JsonArray::toLuaObject(LS){
     lua_newtable(L);
     int idx = 1;
 	for( JsonValue *ele = member; ele; ele = ele->next ){
-        ele->toLuaObject(L);
+        ele->asLuaObject(L);
         lua_rawseti(L, -2, idx );
     }
     return 1;
