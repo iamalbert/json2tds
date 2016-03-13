@@ -3,6 +3,7 @@
 #endif
 #define LS lua_State *L
 
+#include <functional>
 #include "JsonNode.h"
 
 extern "C" {
@@ -14,6 +15,19 @@ extern "C" {
     int json_decode(LS);
 }
 
+struct OnExitScope{
+    std::function< void() > func;
+    template<class Func>
+    OnExitScope( Func f ): func(f) {}
+    ~OnExitScope(){
+        func();
+    }
+};
+
+#define TOKENPASTE(x, y) x ## y
+#define TOKENPASTE2(x, y) TOKENPASTE(x, y)
+#define onexit(x) OnExitScope TOKENPASTE2(__oes, __LINE__) \
+    { [&]{x;} }
 
 int json_decode(LS)
 {
@@ -21,25 +35,29 @@ int json_decode(LS)
 
     FILE *fp = NULL;
     JsonValue * json = nullptr;
+
+    onexit( 
+        if( fp ) fclose(fp);
+        if( json ) delete json;
+    );
     
     fp = fopen(filepath, "rb");
 
     if( fp == NULL ){
         lua_pushnil(L);
+        return 1;
+    }
+
+    json = parse_json(fp);
+    if( json == NULL ){
+        lua_pushnumber(L, 10);
+    }
+
+    if( json != NULL ){
+        json->printJson(std::cout);
+        std::cout << "\n";
     }else{
-        json = parse_json(fp);
-
-        if( json != NULL ){
-            json->printJson(std::cout);
-            std::cout << "\n";
-
-            delete json;
-            json = nullptr;
-            lua_pushnumber(L, 190);
-        }else{
-            lua_pushnumber(L, 10);
-        }
-        fclose(fp);
+        lua_pushnumber(L, 190);
     }
     return 1;
 }
