@@ -123,6 +123,7 @@ int JsonArray::toLuaObject(LS){
 	for( JsonValue *ele = member; ele; ele = ele->next ){
         ele->asLuaObject(L);
         lua_rawseti(L, -2, idx );
+        idx++;
     }
     return 1;
 }
