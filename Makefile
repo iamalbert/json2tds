@@ -1,4 +1,4 @@
-CXX := clang++
+CXX := g++
 LUA_HOME:=/home/wlzhuang/torch/install
 
 CXXFLAGS := -Wall -pedantic -Wno-deprecated-register -O2 -std=c++11
@@ -24,7 +24,7 @@ token.cpp: token.l parser.hpp
 	flex -F --header-file=token.h -o $@ $<
 
 parser.hpp: parser.cpp
-parser.cpp: json.y
+parser.cpp: parser.y
 	bison -d -o $@ $<
 
 clean:

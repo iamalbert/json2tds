@@ -49,16 +49,13 @@ int json_decode(LS)
     }
 
     json = parse_json(fp);
-    if( json == NULL ){
-        lua_pushnumber(L, 10);
-    }
 
     if( json != NULL ){
-        json->printJson(std::cout);
-        std::cout << "\n";
+        json->toLuaObject(L);
     }else{
-        lua_pushnumber(L, 190);
+        lua_pushnil(L);
     }
+
     return 1;
 }
 

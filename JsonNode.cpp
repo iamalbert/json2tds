@@ -25,11 +25,10 @@ std::ostream & JsonValue::print( std::ostream & os ) const {
 std::ostream & JsonValue::printJson( std::ostream & os ) const {
     throw std::runtime_error("printJson this node should be overriden");
 }
-
 int JsonValue::toLuaObject(LS){
     throw std::runtime_error("toLuaObject this node should be overriden");
 }
-
+    int asLuaObject(LS);
 
 JsonPair::JsonPair(std::string* k):
 	key(k) {}
