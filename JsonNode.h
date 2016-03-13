@@ -1,12 +1,22 @@
 #ifndef JSON_NODE_H
 #define JSON_NODE_H
 
+extern "C" {
+    #include <lua.h>
+    #include <lualib.h>
+    #include <lauxlib.h>
+}
+
+#define LS lua_State *L
+
 #include <vector>
 #include <string>
 #include <iostream>
 #include <exception>
 #include <stdexcept>
 #include <deque>
+
+#include <cassert>
 
 struct JsonValue {
 	JsonValue * next;
@@ -18,6 +28,8 @@ struct JsonValue {
 	virtual void breakLinks();
 	virtual std::ostream & print( std::ostream & os ) const;
 	virtual std::ostream & printJson( std::ostream & os ) const;
+    virtual int toLuaObject(LS);
+    int asLuaObject(LS);
 };
 
 struct JsonString;
@@ -29,17 +41,21 @@ struct JsonPair : public JsonValue {
 	virtual ~JsonPair();
 	virtual std::ostream & print( std::ostream & os ) const;
 	virtual std::ostream & printJson( std::ostream & os ) const;
+
+    virtual int toLuaObject(LS);
 };
 
 
 struct JsonObject : public JsonValue {
 	virtual std::ostream & print( std::ostream & os ) const;
 	virtual std::ostream & printJson( std::ostream & os ) const;
+    virtual int toLuaObject(LS);
 };
 
 struct JsonArray : public JsonValue {
 	virtual std::ostream & print( std::ostream & os ) const ;
 	virtual std::ostream & printJson( std::ostream & os ) const;
+    virtual int toLuaObject(LS);
 };
 
 struct JsonString : public JsonValue {
@@ -49,23 +65,26 @@ struct JsonString : public JsonValue {
 
 	virtual std::ostream & print( std::ostream & os ) const ;
 	virtual std::ostream & printJson( std::ostream & os ) const;
-
+    virtual int toLuaObject(LS);
 };
 struct JsonNumber : public JsonValue {
     double value;
     JsonNumber(double v);
 	virtual std::ostream & print( std::ostream & os ) const ;
 	virtual std::ostream & printJson( std::ostream & os ) const;
+    virtual int toLuaObject(LS);
 };
 struct JsonBoolean : public JsonValue {
     bool value;
 	JsonBoolean(bool b);
 	virtual std::ostream & print( std::ostream & os ) const ;
 	virtual std::ostream & printJson( std::ostream & os ) const;
+    virtual int toLuaObject(LS);
 };
 struct JsonNull : public JsonValue {
 	virtual std::ostream & print( std::ostream & os ) const ;
 	virtual std::ostream & printJson( std::ostream & os ) const;
+    virtual int toLuaObject(LS);
 };
 
 
@@ -84,7 +103,7 @@ struct JsonState {
 		return obj;
 	}
 
-	JsonValue * getJsonValue() const ;
+	JsonValue *getJsonValue() const ;
 
 	void free();
 
