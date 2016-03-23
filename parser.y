@@ -79,7 +79,6 @@ elements: element {
     }
 ;
 element: T_STRING {
-        std::cout << "STRING:" << *$1 << "\n";
         $$ = state->newObject<JsonString>($1);
     }| T_NUMBER {
         $$ = state->newObject<JsonNumber>($1);
