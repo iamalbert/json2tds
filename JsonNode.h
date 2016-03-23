@@ -30,6 +30,7 @@ struct JsonValue {
     virtual std::ostream &printJson(std::ostream &os) const;
     virtual int toLuaObject(LS);
     int asLuaObject(LS);
+    JsonValue *reverse_member();
 };
 
 struct JsonString;

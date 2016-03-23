@@ -6,16 +6,28 @@ void JsonValue::breakLinks() {
     next = nullptr;
     member = nullptr;
 }
+JsonValue* JsonValue::reverse_member(){
+    JsonValue  
+        *curr = member,
+        *next = nullptr,
+        *prev = nullptr;
 
+    while( curr ){
+        next = curr->next;
+        curr->next = prev;
+
+        prev = curr;
+        curr = next;
+    }
+    member = prev;
+    return this;
+}
 JsonValue::~JsonValue() {
-    if (next) {
-        delete next;
-        next = nullptr;
-    }
-    if (member) {
-        delete member;
-        member = nullptr;
-    }
+    delete next;
+    next = nullptr;
+
+    delete member;
+    member = nullptr;
 }
 std::ostream &JsonValue::print(std::ostream &os) const {
     return os << "[JsonValue]";
@@ -38,10 +50,8 @@ int JsonValue::asLuaObject(LS) {
 JsonPair::JsonPair(std::string *k) : key(k) {}
 
 JsonPair::~JsonPair() {
-    if (key) {
-        delete key;
-        key = nullptr;
-    }
+    delete key;
+    key = nullptr;
 }
 std::ostream &JsonPair::print(std::ostream &os) const {
     os << "\"" << *key << "\"=>";
@@ -119,10 +129,8 @@ int JsonArray::toLuaObject(LS) {
 
 JsonString::JsonString(std::string *s) : value(s) {}
 JsonString::~JsonString() {
-    if (value) {
-        delete value;
-        value = nullptr;
-    }
+    delete value;
+    value = nullptr;
 }
 std::ostream &JsonString::print(std::ostream &os) const {
     return os << "[JsonString: \"" << *value << "\"]";

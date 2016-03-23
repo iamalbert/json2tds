@@ -47,7 +47,8 @@
 %token T_UNIDENTIFY
     
 
-%type <value> array object elements element members pair collection
+%type <value> array object elements element 
+%type <value> members member collection
 
 
 %start start
@@ -65,19 +66,20 @@ collection: array  {
 array: T_LEFT_BRAK elements T_RIGHT_BRAK { 
         $$ = state->newObject<JsonArray>();
         $$->member = $2;
+        $$->reverse_member();
     }| T_LEFT_BRAK T_RIGHT_BRAK { 
         $$ = state->newObject<JsonArray>();
     }
 ;
 elements: element {
 		$$ = $1;
-    }| element T_COMMA elements {
-		$1->next = $3;
-		$$= $1;
+    }| elements T_COMMA element {
+		$3->next = $1; /* the list is concat reversed */
+		$$ = $3;
     }
 ;
 element: T_STRING {
-        //std::cout << "STRING:" << *$1.strval << "\n";
+        std::cout << "STRING:" << *$1 << "\n";
         $$ = state->newObject<JsonString>($1);
     }| T_NUMBER {
         $$ = state->newObject<JsonNumber>($1);
@@ -99,17 +101,18 @@ object: T_LEFT_CUR T_RIGHT_CUR {
       | T_LEFT_CUR members T_RIGHT_CUR { 
 		$$ = state->newObject<JsonObject>();
         $$->member = $2;
+        $$->reverse_member();
       }
 ;
-members: pair T_COMMA members {
-            $1->next = $3;
+members: member {
             $$ = $1;
-       }
-       | pair {
-            $$ = $1;
+       } |
+       members T_COMMA member {
+            $3->next = $1;
+            $$ = $3;
        }
 ;
-pair: T_STRING T_COLON element {
+member: T_STRING T_COLON element {
     $$ = state->newObject<JsonPair>($1);
 	$$->member =  $3;
 }
