@@ -23,11 +23,6 @@ JsonValue* JsonValue::reverse_member(){
     return this;
 }
 JsonValue::~JsonValue() {
-    delete next;
-    next = nullptr;
-
-    delete member;
-    member = nullptr;
 }
 std::ostream &JsonValue::print(std::ostream &os) const {
     return os << "[JsonValue]";
@@ -49,10 +44,7 @@ int JsonValue::asLuaObject(LS) {
 
 JsonPair::JsonPair(std::string *k) : key(k) {}
 
-JsonPair::~JsonPair() {
-    delete key;
-    key = nullptr;
-}
+JsonPair::~JsonPair() { }
 std::ostream &JsonPair::print(std::ostream &os) const {
     os << "\"" << *key << "\"=>";
     member->print(os);
@@ -128,10 +120,8 @@ int JsonArray::toLuaObject(LS) {
 }
 
 JsonString::JsonString(std::string *s) : value(s) {}
-JsonString::~JsonString() {
-    delete value;
-    value = nullptr;
-}
+JsonString::~JsonString() {}
+
 std::ostream &JsonString::print(std::ostream &os) const {
     return os << "[JsonString: \"" << *value << "\"]";
 }
@@ -180,13 +170,7 @@ int JsonNull::toLuaObject(LS) {
 
 JsonState::JsonState() : value(nullptr) {}
 
-JsonValue *JsonState::getJsonValue() const { return value; }
+//JsonValue *JsonState::getJsonValue() const { return value.get(); }
 
 void JsonState::free() {
-    for (auto ptr : objList) {
-        ptr->breakLinks();
-        delete ptr;
-    }
-    objList.clear();
-    value = nullptr;
 }

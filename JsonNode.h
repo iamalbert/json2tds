@@ -15,12 +15,12 @@ extern "C" {
 #include <exception>
 #include <stdexcept>
 #include <deque>
+#include <memory>
 
 #include <cassert>
 
 struct JsonValue {
-    JsonValue *next;
-    JsonValue *member;
+	JsonValue *next, *member;
     JsonValue();
 
     virtual ~JsonValue();
@@ -36,7 +36,7 @@ struct JsonValue {
 struct JsonString;
 
 struct JsonPair : public JsonValue {
-    std::string *key;
+	std::unique_ptr<std::string> key;
     JsonPair(std::string *k);
 
     virtual ~JsonPair();
@@ -59,7 +59,7 @@ struct JsonArray : public JsonValue {
 };
 
 struct JsonString : public JsonValue {
-    std::string *value;
+	std::unique_ptr<std::string> value;
     JsonString(std::string *s);
     ~JsonString();
 
@@ -88,20 +88,21 @@ struct JsonNull : public JsonValue {
 };
 
 struct JsonState {
-    JsonValue *value;
-    std::deque<JsonValue *> objList;
+	JsonValue *value;
+    std::deque< std::unique_ptr<JsonValue> > objList;
 
     JsonState();
 
     template <class T, class... Args> T *newObject(Args &&... args) {
         static_assert(std::is_base_of<JsonValue, T>::value,
                       "must derived from JsonValue");
-        T *obj = new T(std::forward<Args>(args)...);
-        objList.push_back(obj);
-        return obj;
+
+        objList.push_back( std::make_unique<T>( std::forward<Args>(args)... ) );
+
+        return static_cast<T*>(objList.back().get());
     }
 
-    JsonValue *getJsonValue() const;
+    //JsonValue *getJsonValue() const;
 
     void free();
 };
@@ -112,6 +113,6 @@ struct JsonException : public std::runtime_error {
         : std::runtime_error(std::forward<Args>(args)...) {}
 };
 
-JsonValue *parse_json(FILE *);
+JsonState parse_json(FILE *);
 
 #endif

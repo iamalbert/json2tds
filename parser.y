@@ -3,6 +3,7 @@
     #include <iostream>
     #include <cstdio>
     #include <string>
+    #include <memory>
 
     #include "JsonNode.h"
     #include "parser.hpp"
@@ -128,7 +129,7 @@ void yyerror(yyscan_t scanner, JsonState *state, const char * err ) {
 	throw JsonException(msg);
 }
 
-JsonValue* parse_json( FILE * fp ){
+JsonState parse_json( FILE * fp ){
     JsonState state;
     yyscan_t scanner;
 
@@ -143,7 +144,7 @@ JsonValue* parse_json( FILE * fp ){
 	}
     yylex_destroy(scanner);
 
-	return state.getJsonValue();
+    return std::move(state);
 }
 
 

@@ -32,9 +32,9 @@ int json_decode(LS) {
     const char *filepath = luaL_checkstring(L, 1);
 
     FILE *fp = NULL;
-    JsonValue *json = nullptr;
+    JsonState json;
 
-    onexit(if (fp) fclose(fp); if (json) delete json;);
+    onexit(fclose(fp); fp=NULL; );
 
     fp = fopen(filepath, "rb");
 
@@ -45,8 +45,8 @@ int json_decode(LS) {
 
     json = parse_json(fp);
 
-    if (json != NULL) {
-        json->toLuaObject(L);
+    if (json.value != NULL) {
+        json.value->toLuaObject(L);
     } else {
         lua_pushnil(L);
     }
