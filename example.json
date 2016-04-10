@@ -1,7 +1,8 @@
 {"widget": {
     "debug": "on",
     "window": {
-        "title": "Sample Konfabulator Widget",
+        "empty": "",
+        "title": "Sample Konfabulator Widget\u5B57字",
         "name": "main_window",
         "width": 500,
         "height": 500

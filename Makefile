@@ -6,7 +6,7 @@ LUA_HOME := $(realpath $(dir $(shell which th))../)
 LUA_INCDIR ?= $(LUA_HOME)/include
 LUA_LIBDIR ?= $(LUA_HOME)/lib
 
-CXXFLAGS ?= -Wall -pedantic -Wno-deprecated-register -O2 -std=c++11 -I$(LUA_HOME)/include
+CXXFLAGS ?= -Wall -pedantic -Wno-deprecated-register -O2 -std=c++14 -I$(LUA_HOME)/include
 
 all: json2tds.so testcpp
 
@@ -28,7 +28,7 @@ json2tds.o: json2tds.cpp
 
 token.h: token.cpp
 token.cpp: token.l parser.hpp
-	flex -F --header-file=token.h -o $@ $<
+	flex -F -8 --header-file=token.h -o $@ $<
 
 parser.hpp: parser.cpp
 parser.cpp: parser.y
