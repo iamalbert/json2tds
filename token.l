@@ -17,15 +17,34 @@
 #endif
 //(yylval.token = t)
 
+char * codepoint_to_char(unsigned long c, char *b ){
+    if (c<0x80) *b++=c;
+    else if (c<0x800) *b++=192+c/64, *b++=128+c%64;
+    else if (c-0xd800u<0x800) return 0;
+    else if (c<0x10000) *b++=224+c/4096, *b++=128+c/64%64, *b++=128+c%64;
+    else if (c<0x110000) *b++=240+c/262144, *b++=128+c/4096%64, *b++=128+c/64%64, *b++=128+c%64;
+    else {
+        return 0;
+    }
+    return b;
+}
+
+unsigned long int hex2int(char * b ){
+    return strtoul( b, NULL, 16 );
+}
+
 char * escape_str(char * first, size_t len){
     char * last = first + len;
     char * org_first = first;
     char * pos = first;
 
+    char str[5] = {0};
+
     while( first != last && *first != '\0' ){
         //printf("%c\n", *first);
         if ( *first == '\\' ){
             int flag = 0;
+            unsigned long codepoint = 0;
             switch( *(first+1) ){
                 case 't': *pos = '\t'; break;
                 case 'b': *pos = '\b'; break;
@@ -34,14 +53,24 @@ char * escape_str(char * first, size_t len){
                 case 'f': *pos = '\f'; break;
                 case '"': *pos = '"'; break;
                 case '\\': *pos = '\\'; break;
+                case 'u':
+                    memcpy(str, first+2, 4);
+                    codepoint = hex2int(str);
+                    pos = codepoint_to_char(codepoint, pos);
+
+                    flag = 2;
+                    break;
                 default:
                     *pos = *first;
                     flag  = 1;
             }
-            if (flag) {
+            if (flag == 1) {
                 pos += 1;
                 first += 1;
-            }else{
+            }else if(flag == 2){
+                /* pos is moved in codepoint_to_char() */
+                first += 6;
+            }else {
                 pos += 1;
                 first += 2;
             }
