@@ -16,7 +16,7 @@ dependencies = {
 build = {
    type = "make",
    build_variables = {
-      CXXFLAGS = "-std=c++11 -Wall -pedantic -O2 -I$(LUA_INCDIR)",
+      CXXFLAGS = "-std=c++14 -Wall -pedantic -O2 -I$(LUA_INCDIR)",
       LIBFLAG = "$(LIBFLAG)",
       LUA = "$(LUA)",
       LUA_BINDIR = "$(LUA_BINDIR)",

@@ -82,7 +82,6 @@ char * escape_str(char * first, size_t len){
         }
     }
     *pos = '\0';
-    puts(org_first);
     return org_first;
 }
 
