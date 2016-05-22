@@ -14,6 +14,7 @@
     extern int yylex(YYSTYPE * yylval, yyscan_t  scanner );
     extern void yyerror(yyscan_t scanner, JsonState*, const char *);
 
+
 %}
 
 %define parse.error verbose

@@ -17,6 +17,45 @@
 #endif
 //(yylval.token = t)
 
+char * escape_str(char * first, size_t len){
+    char * last = first + len;
+    char * org_first = first;
+    char * pos = first;
+
+    while( first != last && *first != '\0' ){
+        //printf("%c\n", *first);
+        if ( *first == '\\' ){
+            int flag = 0;
+            switch( *(first+1) ){
+                case 't': *pos = '\t'; break;
+                case 'b': *pos = '\b'; break;
+                case 'n': *pos = '\n'; break;
+                case 'r': *pos = '\r'; break;
+                case 'f': *pos = '\f'; break;
+                case '"': *pos = '"'; break;
+                case '\\': *pos = '\\'; break;
+                default:
+                    *pos = *first;
+                    flag  = 1;
+            }
+            if (flag) {
+                pos += 1;
+                first += 1;
+            }else{
+                pos += 1;
+                first += 2;
+            }
+        }else{
+            *pos = *first;
+
+            pos += 1;
+            first += 1;
+        }
+    }
+    *pos = '\0';
+    puts(org_first);
+    return org_first;
+}
 
 %}
 
@@ -56,7 +95,7 @@ CHARS           {CHAR}+
 
 {DBL_QUOTE}{DBL_QUOTE} |
 {DBL_QUOTE}{CHARS}{DBL_QUOTE} { 
-	yylval->strval = new std::string(yytext+1, yyleng-2);
+	yylval->strval = new std::string(escape_str(yytext+1, yyleng-2));
     TOKEN(T_STRING);
 };
 
