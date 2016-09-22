@@ -39,6 +39,24 @@ METHOD_DECLARE(loads){
     return 1;
 }
 
+METHOD_DECLARE(load){
+    const char *filename = luaL_checkstring(L, 1);
+    JsonState *state = parse_json(filename);
+
+    if( state->value == NULL ){
+        luaL_error(L, "parse error, not a valid JSON file");
+        return 0;
+    }
+
+    JsonValue** self = (JsonValue**) lua_newuserdata(L, sizeof(JsonValue*) );
+    luaL_getmetatable(L, PACKAGE_NAME_STR);
+    lua_setmetatable(L, -2);
+    
+    *self = state->value;
+
+    return 1;
+}
+
 METHOD_DECLARE(__gc){
     JsonValue *self = *(JsonValue**)luaL_checkudata(L, 1, PACKAGE_NAME_STR);
 
@@ -209,6 +227,7 @@ int luaopen_libcjson(LS){
 
     ADD_METHOD(type);
     ADD_METHOD(loads);
+    ADD_METHOD(load);
     ADD_METHOD(totable);
     ADD_METHOD(keys);
 
