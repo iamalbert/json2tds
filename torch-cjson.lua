@@ -1,4 +1,4 @@
-local JSON = require './libcjson'
+local JSON = require 'libcjson'
 
 
 local tab = "    "

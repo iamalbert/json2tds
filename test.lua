@@ -1,4 +1,4 @@
-JSON = require './torch-cjson'
+JSON = require 'torch-cjson'
 print(JSON)
 
 obj = JSON.loads '[2, [34, [9, 0] ], null, 1.2, 302.00, true, false, "hi", "\\\\" ]'

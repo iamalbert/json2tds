@@ -1,13 +1,13 @@
-package = "json2tds"
-version = "1.0-0"
+package = "torch-cjson"
+version = "scm-1"
 source = {
-   url = "git://github.com/iamalbert/json2tds"
+   url = "git://github.com/iamalbert/torch-cjson"
 }
 description = {
-   summary = "load Json into Lua",
+   summary = "load large JSON into LuaJIT",
    detailed = [[
    ]],
-   homepage = "https://github.com/iamalbert/json2tds",
+   homepage = "https://github.com/iamalbert/torch-cjson",
    license = "MIT"
 }
 dependencies = {
