@@ -16,7 +16,7 @@ install: json2tds.so
 
 json2tds.so: json2tds.cpp parser.o token.o JsonNode.o
 	$(CXX) $(CXXFLAGS) -fPIC -shared -o $@ $^ -ll
-cjson.so: cjson.cpp parser.o token.o JsonNode.o
+libcjson.so: cjson.cpp parser.o token.o JsonNode.o
 	$(CXX) $(CXXFLAGS) -fPIC -shared -o $@ $^ -ll
 
 %.o: %.cpp token.h parser.hpp

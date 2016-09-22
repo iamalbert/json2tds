@@ -59,7 +59,7 @@
 
 start: element {
 	state->value = $1;
-	//state->value->root = state;
+	state->value->root = state;
 }
 
 array: T_LEFT_BRAK elements T_RIGHT_BRAK { 

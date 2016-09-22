@@ -1,9 +1,20 @@
 #include "JsonNode.h"
 
 
-JsonValue::JsonValue() : type('?'), next(nullptr), member(nullptr), root(nullptr) {}
-JsonValue::JsonValue(char c) : type(c), next(nullptr), member(nullptr) {}
+JsonValue::JsonValue() : JsonValue('?') {}
+JsonValue::JsonValue(char c) : type(c), next(nullptr), member(nullptr), root(nullptr) {}
 
+const char * JsonValue::typeString() const {
+    switch(type){
+        case 'n': return "JsonNumber";
+        case 'b': return "JsonBoolean";
+        case 's': return "JsonString";
+        case 'o': return "JsonObject";
+        case 'a': return "JsonArray";
+        default:
+                  return "JsonUnknownType";
+    }
+}
 void JsonValue::breakLinks() {
     next = nullptr;
     member = nullptr;
@@ -96,7 +107,7 @@ int JsonObject::toLuaObject(LS) {
 }
 void JsonObject::list2map(){
     for (JsonPair *ele = (JsonPair *)member; ele; ele = (JsonPair *)ele->next) {
-        ptrTable[ *ele->key.get() ] = ele;
+        ptrTable[ *ele->key.get() ] = ele->member;
     }
 }
 
@@ -199,6 +210,7 @@ int JsonNull::toLuaObject(LS) {
 }
 
 JsonState::JsonState() : value(nullptr) {}
+JsonState::~JsonState() { }
 
 //JsonValue *JsonState::getJsonValue() const { return value.get(); }
 

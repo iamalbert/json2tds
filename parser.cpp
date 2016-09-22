@@ -1253,7 +1253,7 @@ yyreduce:
 #line 60 "parser.y" /* yacc.c:1646  */
     {
 	state->value = (yyvsp[0].value);
-	//state->value->root = state;
+	state->value->root = state;
 }
 #line 1259 "parser.cpp" /* yacc.c:1646  */
     break;

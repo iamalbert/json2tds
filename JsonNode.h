@@ -42,7 +42,7 @@ struct JsonState;
 
 struct JsonValue {
     char type;
-	JsonValue *next, *member;
+    JsonValue *next, *member;
     JsonState *root;
 
     JsonValue();
@@ -62,6 +62,7 @@ struct JsonValue {
     int luaGet(LS);
     int luaLen(LS);
     bool isBaseType() const;
+    const char * typeString() const;
 
     template<class T> T* as(){
         return dynamic_cast<T*>(this);
@@ -146,6 +147,7 @@ struct JsonState {
     std::deque< std::unique_ptr<JsonValue> > objList;
 
     JsonState();
+    ~JsonState();
 
     template <class T, class... Args> T *newObject(Args &&... args) {
         static_assert(std::is_base_of<JsonValue, T>::value,
