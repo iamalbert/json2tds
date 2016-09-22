@@ -59,12 +59,14 @@
 
 start: element {
 	state->value = $1;
+	//state->value->root = state;
 }
 
 array: T_LEFT_BRAK elements T_RIGHT_BRAK { 
         $$ = state->newObject<JsonArray>();
         $$->member = $2;
         $$->reverse_member();
+		((JsonArray*)$$)->list2vector();
     }| T_LEFT_BRAK T_RIGHT_BRAK { 
         $$ = state->newObject<JsonArray>();
     }
@@ -99,6 +101,7 @@ object: T_LEFT_CUR T_RIGHT_CUR {
 		$$ = state->newObject<JsonObject>();
         $$->member = $2;
         $$->reverse_member();
+		((JsonObject*)$$)->list2map();
       }
 ;
 members: member {
@@ -126,35 +129,35 @@ void yyerror(yyscan_t scanner, JsonState *state, const char * err ) {
 	throw JsonException(msg);
 }
 
-JsonState parse_json( FILE * fp ){
-    JsonState state;
+JsonState* parse_json( FILE * fp ){
+    JsonState* state = new JsonState();
     yyscan_t scanner;
 
     yylex_init(&scanner);
 	try{
 		yyset_in( fp, scanner );
-		yyparse(scanner, &state);
+		yyparse(scanner, state);
 		//state.getJsonValue()->print(std::cerr);
 	}catch( std::exception & e ){
 		std::cerr << e.what();
-		state.free();
+		state->free();
 	}
     yylex_destroy(scanner);
 
     return std::move(state);
 }
-JsonState parse_json_string( const char * string ){
-    JsonState state;
+JsonState* parse_json_string( const char * string ){
+    JsonState* state = new JsonState();
     yyscan_t scanner;
     yylex_init(&scanner);
 	try{
 		YY_BUFFER_STATE buffer = yy_scan_string(string, scanner);
 		yyset_lineno(1, scanner);
-		yyparse(scanner, &state);
+		yyparse(scanner, state);
 		yy_delete_buffer(buffer, scanner);
 	}catch( std::exception & e ){
 		std::cerr << e.what();
-		state.free();
+		state->free();
 	}
     yylex_destroy(scanner);
 

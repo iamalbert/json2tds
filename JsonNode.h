@@ -9,6 +9,8 @@ extern "C" {
 
 #define LS lua_State *L
 
+#define LUA_INDEX_BASE (1)
+
 #include <vector>
 #include <string>
 #include <iostream>
@@ -36,18 +38,37 @@ struct JsonNode {
 };
 
 
+struct JsonState;
+
 struct JsonValue {
+    char type;
 	JsonValue *next, *member;
+    JsonState *root;
+
     JsonValue();
+    JsonValue(char);
+
+
 
     virtual ~JsonValue();
 
     virtual void breakLinks();
     virtual std::ostream &print(std::ostream &os) const;
     virtual std::ostream &printJson(std::ostream &os) const;
+
     virtual int toLuaObject(LS);
     int asLuaObject(LS);
+
+    int luaGet(LS);
+    int luaLen(LS);
+    bool isBaseType() const;
+
+    template<class T> T* as(){
+        return dynamic_cast<T*>(this);
+    }
+
     JsonValue *reverse_member();
+
 };
 
 struct JsonString;
@@ -64,15 +85,28 @@ struct JsonPair : public JsonValue {
 };
 
 struct JsonObject : public JsonValue {
+
+    JsonObject();
+
+    std::map<std::string, JsonValue*> ptrTable;
+
     virtual std::ostream &print(std::ostream &os) const;
     virtual std::ostream &printJson(std::ostream &os) const;
     virtual int toLuaObject(LS);
+    void list2map();
 };
 
 struct JsonArray : public JsonValue {
+
+    std::vector<JsonValue*> ptrVec;
+
+    JsonArray();
+
     virtual std::ostream &print(std::ostream &os) const;
     virtual std::ostream &printJson(std::ostream &os) const;
     virtual int toLuaObject(LS);
+
+    void list2vector();
 };
 
 struct JsonString : public JsonValue {
@@ -99,6 +133,9 @@ struct JsonBoolean : public JsonValue {
     virtual int toLuaObject(LS);
 };
 struct JsonNull : public JsonValue {
+
+    JsonNull();
+
     virtual std::ostream &print(std::ostream &os) const;
     virtual std::ostream &printJson(std::ostream &os) const;
     virtual int toLuaObject(LS);
@@ -114,7 +151,8 @@ struct JsonState {
         static_assert(std::is_base_of<JsonValue, T>::value,
                       "must derived from JsonValue");
 
-        objList.push_back( std::make_unique<T>( std::forward<Args>(args)... ) );
+        auto p = std::make_unique<T>( std::forward<Args>(args)... ) ;
+        objList.push_back( std::move(p) );
 
         return static_cast<T*>(objList.back().get());
     }
@@ -130,7 +168,7 @@ struct JsonException : public std::runtime_error {
         : std::runtime_error(std::forward<Args>(args)...) {}
 };
 
-JsonState parse_json(FILE *);
-JsonState parse_json_string(const char *);
+JsonState* parse_json(FILE *);
+JsonState* parse_json_string(const char *);
 
 #endif

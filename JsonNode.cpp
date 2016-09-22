@@ -1,6 +1,8 @@
 #include "JsonNode.h"
 
-JsonValue::JsonValue() : next(nullptr), member(nullptr) {}
+
+JsonValue::JsonValue() : type('?'), next(nullptr), member(nullptr), root(nullptr) {}
+JsonValue::JsonValue(char c) : type(c), next(nullptr), member(nullptr) {}
 
 void JsonValue::breakLinks() {
     next = nullptr;
@@ -42,8 +44,7 @@ int JsonValue::asLuaObject(LS) {
     return 1;
 }
 
-JsonPair::JsonPair(std::string *k) : key(k) {}
-
+JsonPair::JsonPair(std::string *k) : JsonValue('p'), key(k) {}
 JsonPair::~JsonPair() { }
 std::ostream &JsonPair::print(std::ostream &os) const {
     os << "\"" << *key << "\"=>";
@@ -61,6 +62,11 @@ int JsonPair::toLuaObject(LS) {
     return 1;
 }
 
+
+
+///////////
+
+JsonObject::JsonObject() : JsonValue('o') {}
 std::ostream &JsonObject::print(std::ostream &os) const {
     os << "{JsonObject:";
     for (JsonValue *ele = member; ele; ele = ele->next) {
@@ -88,6 +94,15 @@ int JsonObject::toLuaObject(LS) {
     }
     return 1;
 }
+void JsonObject::list2map(){
+    for (JsonPair *ele = (JsonPair *)member; ele; ele = (JsonPair *)ele->next) {
+        ptrTable[ *ele->key.get() ] = ele;
+    }
+}
+
+/////////
+
+JsonArray::JsonArray() : JsonValue('a') {}
 
 std::ostream &JsonArray::print(std::ostream &os) const {
     os << "[JsonArray:";
@@ -118,8 +133,15 @@ int JsonArray::toLuaObject(LS) {
     }
     return 1;
 }
+void JsonArray::list2vector(){
+    for (JsonValue *ele = member; ele; ele = ele->next) {
+        ptrVec.push_back(ele);
+    }
+}
 
-JsonString::JsonString(std::string *s) : value(s) {}
+/////
+
+JsonString::JsonString(std::string *s) : JsonValue('s'), value(s)  {}
 JsonString::~JsonString() {}
 
 std::ostream &JsonString::print(std::ostream &os) const {
@@ -133,7 +155,9 @@ int JsonString::toLuaObject(LS) {
     return 1;
 }
 
-JsonNumber::JsonNumber(double v) : value(v) {}
+//////
+
+JsonNumber::JsonNumber(double v) : JsonValue('n'), value(v) {}
 std::ostream &JsonNumber::print(std::ostream &os) const {
     return os << "[JsonNumber: " << value << "]";
 }
@@ -145,7 +169,9 @@ int JsonNumber::toLuaObject(LS) {
     return 1;
 }
 
-JsonBoolean::JsonBoolean(bool b) : value(b) {}
+///
+
+JsonBoolean::JsonBoolean(bool b) : JsonValue('b'), value(b) {}
 std::ostream &JsonBoolean::print(std::ostream &os) const {
     return os << "[JsonBoolean: " << (value ? "true" : "false") << "]";
 }
@@ -156,6 +182,10 @@ int JsonBoolean::toLuaObject(LS) {
     lua_pushboolean(L, value);
     return 1;
 }
+
+//////// JsonNull
+
+JsonNull::JsonNull() : JsonValue('x') {}
 
 std::ostream &JsonNull::print(std::ostream &os) const {
     return os << "[JsonNull]";
