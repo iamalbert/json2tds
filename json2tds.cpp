@@ -34,21 +34,30 @@ int json_decode(LS) {
     FILE *fp = NULL;
     JsonState json;
 
-    onexit(fclose(fp); fp=NULL; );
+    onexit(
+        if(fp != NULL){fclose(fp); fp=NULL;}
+    );
 
     fp = fopen(filepath, "rb");
 
     if (fp == NULL) {
-        lua_pushnil(L);
-        return 1;
+        luaL_error(L, "file not found: %s", filepath);
+        return 0;
+
+        //lua_pushnil(L);
+        //return 1;
     }
 
     json = parse_json(fp);
 
+    std::cout << "parsed\n";
+
+
     if (json.value != NULL) {
         json.value->toLuaObject(L);
     } else {
-        lua_pushnil(L);
+        luaL_error(L, "parse error, not a valid JSON");
+        return 0;
     }
 
     return 1;
