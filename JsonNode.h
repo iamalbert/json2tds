@@ -16,8 +16,25 @@ extern "C" {
 #include <stdexcept>
 #include <deque>
 #include <memory>
+#include <map>
+#include <vector>
 
 #include <cassert>
+
+struct JsonNode;
+
+struct JsonNode {
+    union {
+        int i;
+        double d;
+        char * s;
+        std::map<std::string, JsonNode> o;
+        std::vector<JsonNode> a;
+    } value;
+
+    char type; // i(nt),d(ouble),s(tring),o(bject),a(rray),n(ull)
+};
+
 
 struct JsonValue {
 	JsonValue *next, *member;
@@ -114,5 +131,6 @@ struct JsonException : public std::runtime_error {
 };
 
 JsonState parse_json(FILE *);
+JsonState parse_json_string(const char *);
 
 #endif

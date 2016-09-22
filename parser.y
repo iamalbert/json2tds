@@ -50,21 +50,17 @@
     
 
 %type <value> array object elements element 
-%type <value> members member collection
+%type <value> members member
 
 
 %start start
 
 %%
 
-start: collection 
+start: element {
+	state->value = $1;
+}
 
-collection: array  { 
-        state->value = $1;
-    }| object {
-        state->value = $1;
-    }
-;
 array: T_LEFT_BRAK elements T_RIGHT_BRAK { 
         $$ = state->newObject<JsonArray>();
         $$->member = $2;
@@ -139,6 +135,23 @@ JsonState parse_json( FILE * fp ){
 		yyset_in( fp, scanner );
 		yyparse(scanner, &state);
 		//state.getJsonValue()->print(std::cerr);
+	}catch( std::exception & e ){
+		std::cerr << e.what();
+		state.free();
+	}
+    yylex_destroy(scanner);
+
+    return std::move(state);
+}
+JsonState parse_json_string( const char * string ){
+    JsonState state;
+    yyscan_t scanner;
+    yylex_init(&scanner);
+	try{
+		YY_BUFFER_STATE buffer = yy_scan_string(string, scanner);
+		yyset_lineno(1, scanner);
+		yyparse(scanner, &state);
+		yy_delete_buffer(buffer, scanner);
 	}catch( std::exception & e ){
 		std::cerr << e.what();
 		state.free();

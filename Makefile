@@ -16,11 +16,11 @@ install: json2tds.so
 
 json2tds.so: json2tds.cpp parser.o token.o JsonNode.o
 	$(CXX) $(CXXFLAGS) -fPIC -shared -o $@ $^ -ll
+cjson.so: cjson.cpp parser.o token.o JsonNode.o
+	$(CXX) $(CXXFLAGS) -fPIC -shared -o $@ $^ -ll
 
 %.o: %.cpp token.h parser.hpp
 	$(CXX) -fPIC -shared -c $(CXXFLAGS) -o $@ $<
-%.so: %.cpp token.h parser.hpp
-	$(CXX) -fPIC -shared $(CXXFLAGS) -o $@ $< -ll
 
 testcpp: testcpp.o parser.o token.o JsonNode.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ -L$(LUA_HOME)/lib -ll -lluajit

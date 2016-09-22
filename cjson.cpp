@@ -1,15 +1,4 @@
-#if defined LS
-	#undef LS
-#endif
-#define LS lua_State *L
-
-extern "C" {
-	#include <lua.h>
-	#include <lualib.h>
-	#include <lauxlib.h>
-
-	int luaopen_cjson(LS);
-}
+#include "JsonNode.h"
 
 #define STRINGIFY(x) #x
 #define XSTRINGIFY(x) STRINGIFY(x)
@@ -20,11 +9,11 @@ extern "C" {
 
 const char * const PACKAGE = PACKAGE_NAME_STR;
 
-struct JsonValue {
+struct JsonValue2 {
 	int value;
-	JsonValue(int v): value(v) {}
+	JsonValue2(int v): value(v) {}
 
-	~JsonValue(){
+	~JsonValue2(){
 		puts("deleted");
 	}
 };
@@ -33,7 +22,11 @@ struct JsonValue {
 #define XPASTE(x,y) PASTE(x,y)
 #define METHOD(x) XPASTE( PACKAGE_NAME, _ ## x)
 
-#define METHOD_DECLARE(x) int METHOD(x) (LS)
+#define METHOD_DECLARE(x) extern "C" int METHOD(x) (LS)
+
+extern "C" {
+	int luaopen_cjson(LS);
+}
 
 METHOD_DECLARE(__len){
 	luaL_checkudata(L, 1, PACKAGE_NAME_STR);
@@ -42,24 +35,28 @@ METHOD_DECLARE(__len){
 }
 
 METHOD_DECLARE(new){
-	JsonValue** self = (JsonValue**) lua_newuserdata(L, sizeof(JsonValue*) );
+	JsonValue2** self = (JsonValue2**) lua_newuserdata(L, sizeof(JsonValue2*) );
 	luaL_getmetatable(L, PACKAGE_NAME_STR);
 	lua_setmetatable(L, -2);
 
-	*self = new JsonValue(10000);
+	*self = new JsonValue2(10000);
 
 	return 1;
 }
 
-METHOD_DECLARE(getVal){
-	JsonValue *self = *(JsonValue**)luaL_checkudata(L, 1, PACKAGE_NAME_STR);
+METHOD_DECLARE(loads){
+	const char *string = luaL_checkstring(L, 1);
+	JsonState state = parse_json_string(string);
 
-	lua_pushnumber(L, self->value);
-	return 1;
+	if( state.value == NULL ){
+        luaL_error(L, "parse error, not a valid JSON");
+		return 0;
+	}
+	return METHOD(new)(L);
 }
 
 METHOD_DECLARE(__gc){
-	JsonValue *self = *(JsonValue**)luaL_checkudata(L, 1, PACKAGE_NAME_STR);
+	JsonValue2 *self = *(JsonValue2**)luaL_checkudata(L, 1, PACKAGE_NAME_STR);
 
 	delete self;
 
@@ -80,6 +77,7 @@ int luaopen_cjson(LS){
 	ADD_METHOD(__len);
 	ADD_METHOD(__gc);
 	ADD_METHOD(new);
+	ADD_METHOD(loads);
 
 	lua_newtable(L);
     lua_setfield(L, -2, "__index");
