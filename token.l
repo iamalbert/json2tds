@@ -123,7 +123,8 @@ CHARS           {CHAR}+
 
 {DBL_QUOTE}{DBL_QUOTE} |
 {DBL_QUOTE}{CHARS}{DBL_QUOTE} { 
-	yylval->strval = new std::string(escape_str(yytext+1, yyleng-2));
+    yytext[1 + yyleng-2] = '\0';
+	yylval->strval = yytext + 1;
     TOKEN(T_STRING);
 };
 

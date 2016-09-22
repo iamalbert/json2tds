@@ -70,7 +70,7 @@ union YYSTYPE
 
     JsonValue * value;
 
-    std::string * strval;
+    char * strval;
     double numval;
     int token;
 

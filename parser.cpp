@@ -140,7 +140,7 @@ union YYSTYPE
 
     JsonValue * value;
 
-    std::string * strval;
+    char * strval;
     double numval;
     int token;
 
@@ -1297,7 +1297,7 @@ yyreduce:
   case 7:
 #line 81 "parser.y" /* yacc.c:1646  */
     {
-        (yyval.value) = state->newObject<JsonString>((yyvsp[0].strval));
+        (yyval.value) = state->newObject<JsonString>(state, (yyvsp[0].strval));
     }
 #line 1303 "parser.cpp" /* yacc.c:1646  */
     break;
@@ -1389,7 +1389,7 @@ yyreduce:
   case 18:
 #line 115 "parser.y" /* yacc.c:1646  */
     {
-    (yyval.value) = state->newObject<JsonPair>((yyvsp[-2].strval));
+    (yyval.value) = state->newObject<JsonPair>(state ,(yyvsp[-2].strval));
 	(yyval.value)->member =  (yyvsp[0].value);
 }
 #line 1396 "parser.cpp" /* yacc.c:1646  */

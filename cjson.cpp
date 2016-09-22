@@ -33,7 +33,8 @@ METHOD_DECLARE(loads){
     JsonValue** self = (JsonValue**) lua_newuserdata(L, sizeof(JsonValue*) );
     luaL_getmetatable(L, PACKAGE_NAME_STR);
     lua_setmetatable(L, -2);
-    
+
+    printf("size : %lu\n", state->objList.size() );
     *self = state->value;
 
     return 1;
@@ -41,7 +42,14 @@ METHOD_DECLARE(loads){
 
 METHOD_DECLARE(load){
     const char *filename = luaL_checkstring(L, 1);
-    JsonState *state = parse_json(filename);
+
+    FILE * fp = fopen(filename, "rb");
+    if ( fp == NULL ){
+        luaL_error(L, "file not found `%s'", filename);
+        return 0;
+    }
+
+    JsonState *state = parse_json(fp);
 
     if( state->value == NULL ){
         luaL_error(L, "parse error, not a valid JSON file");
@@ -52,6 +60,16 @@ METHOD_DECLARE(load){
     luaL_getmetatable(L, PACKAGE_NAME_STR);
     lua_setmetatable(L, -2);
     
+    printf("size : %lu\n", state->objList.size() );
+
+    for( auto & val : state->objList ){
+        if ( val->type == 'p' ){
+            delete val.release();
+        }
+    }
+
+    fclose(fp);
+
     *self = state->value;
 
     return 1;
@@ -91,7 +109,7 @@ METHOD_DECLARE(keys){
     int i = 1;
     for ( auto & kv : self->as<JsonObject>()->ptrTable ){
         lua_pushinteger(L, i);
-        lua_pushstring(L, kv.first.c_str() );
+        lua_pushstring(L, kv.first->c_str() );
         lua_settable(L, -3);
         i+=1;
     }
@@ -142,7 +160,7 @@ int JsonValue::luaLen(LS){
     luaL_error(L, "unknown");
     return 0;
 }
-int JsonValue::luaGet(LS){
+int JsonValue::luaGet(LS, JsonState *state ){
 
     switch(type){
         case 'n': 
@@ -156,7 +174,8 @@ int JsonValue::luaGet(LS){
         case 'o': {
             size_t len;
             const char *cstr = luaL_checklstring(L, 2, &len);
-            std::string key{cstr};
+
+            const std::string *  key = state->getString(cstr);
 
             JsonObject * self = as<JsonObject>();
 

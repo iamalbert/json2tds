@@ -36,6 +36,7 @@ JsonValue* JsonValue::reverse_member(){
     return this;
 }
 JsonValue::~JsonValue() {
+    //puts("wiped");
 }
 std::ostream &JsonValue::print(std::ostream &os) const {
     return os << "[JsonValue]";
@@ -55,7 +56,9 @@ int JsonValue::asLuaObject(LS) {
     return 1;
 }
 
-JsonPair::JsonPair(std::string *k) : JsonValue('p'), key(k) {}
+JsonPair::JsonPair(JsonState * state, char *s) : JsonValue('p') {
+    key = state->getString(s);
+}
 JsonPair::~JsonPair() { }
 std::ostream &JsonPair::print(std::ostream &os) const {
     os << "\"" << *key << "\"=>";
@@ -99,15 +102,15 @@ std::ostream &JsonObject::printJson(std::ostream &os) const {
 }
 int JsonObject::toLuaObject(LS) {
     lua_newtable(L);
-    for (JsonPair *ele = (JsonPair *)member; ele; ele = (JsonPair *)ele->next) {
-        ele->member->asLuaObject(L);
-        lua_setfield(L, -2, ele->key->c_str());
+    for ( auto & kv : ptrTable ){
+        kv.second->toLuaObject(L);
+        lua_setfield(L, -2, kv.first->c_str() );
     }
     return 1;
 }
 void JsonObject::list2map(){
     for (JsonPair *ele = (JsonPair *)member; ele; ele = (JsonPair *)ele->next) {
-        ptrTable[ *ele->key.get() ] = ele->member;
+        ptrTable[ ele->key ] = ele->member;
     }
 }
 
@@ -137,8 +140,8 @@ std::ostream &JsonArray::printJson(std::ostream &os) const {
 int JsonArray::toLuaObject(LS) {
     lua_newtable(L);
     int idx = 1;
-    for (JsonValue *ele = member; ele; ele = ele->next) {
-        ele->asLuaObject(L);
+    for ( auto & v : ptrVec ){
+        v->toLuaObject(L);
         lua_rawseti(L, -2, idx);
         idx++;
     }
@@ -152,7 +155,10 @@ void JsonArray::list2vector(){
 
 /////
 
-JsonString::JsonString(std::string *s) : JsonValue('s'), value(s)  {}
+JsonString::JsonString(JsonState * state, char * s) : JsonValue('s') {
+    value = state->getString(s);
+    s = nullptr;
+}
 JsonString::~JsonString() {}
 
 std::ostream &JsonString::print(std::ostream &os) const {
@@ -210,7 +216,13 @@ int JsonNull::toLuaObject(LS) {
 }
 
 JsonState::JsonState() : value(nullptr) {}
-JsonState::~JsonState() { }
+JsonState::~JsonState() {
+    objList.clear();
+    printf("freed, size: %lu\n", objList.size() );
+}
+const std::string * JsonState::getString( const char * str ){
+    return &(*strPool.insert(str).first);
+}
 
 //JsonValue *JsonState::getJsonValue() const { return value.get(); }
 

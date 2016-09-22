@@ -1533,13 +1533,14 @@ case 2:
 YY_RULE_SETUP
 #line 125 "token.l"
 { 
-	yylval->strval = new std::string(escape_str(yytext+1, yyleng-2));
+    yytext[1 + yyleng-2] = '\0';
+	yylval->strval = yytext + 1;
     TOKEN(T_STRING);
 };
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 130 "token.l"
+#line 131 "token.l"
 { 
 	yylval->numval = atof(yytext);
 	TOKEN(T_NUMBER); 
@@ -1547,66 +1548,66 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 135 "token.l"
+#line 136 "token.l"
 { TOKEN(T_TRUE); };
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 136 "token.l"
+#line 137 "token.l"
 { TOKEN(T_FALSE); };
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 137 "token.l"
+#line 138 "token.l"
 { TOKEN(T_NULL); };
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 139 "token.l"
+#line 140 "token.l"
 { TOKEN(T_LEFT_CUR); };
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 140 "token.l"
+#line 141 "token.l"
 { TOKEN(T_RIGHT_CUR); };
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 142 "token.l"
+#line 143 "token.l"
 { TOKEN(T_LEFT_BRAK); };
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 143 "token.l"
+#line 144 "token.l"
 { TOKEN(T_RIGHT_BRAK); };
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 145 "token.l"
+#line 146 "token.l"
 { TOKEN(T_COMMA); };
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 146 "token.l"
+#line 147 "token.l"
 { TOKEN(T_COLON); };
 	YY_BREAK
 case 13:
 /* rule 13 can match eol */
 YY_RULE_SETUP
-#line 148 "token.l"
+#line 149 "token.l"
 /* ignore whitespace */;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 150 "token.l"
+#line 151 "token.l"
 { TOKEN(T_UNIDENTIFY); }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 152 "token.l"
+#line 153 "token.l"
 ECHO;
 	YY_BREAK
-#line 1610 "token.cpp"
+#line 1611 "token.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2776,7 +2777,7 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 151 "token.l"
+#line 152 "token.l"
 
 
 

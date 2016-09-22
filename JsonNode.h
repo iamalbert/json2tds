@@ -19,6 +19,7 @@ extern "C" {
 #include <deque>
 #include <memory>
 #include <map>
+#include <set>
 #include <vector>
 
 #include <cassert>
@@ -59,7 +60,7 @@ struct JsonValue {
     virtual int toLuaObject(LS);
     int asLuaObject(LS);
 
-    int luaGet(LS);
+    int luaGet(LS, JsonState * = 0);
     int luaLen(LS);
     bool isBaseType() const;
     const char * typeString() const;
@@ -75,8 +76,8 @@ struct JsonValue {
 struct JsonString;
 
 struct JsonPair : public JsonValue {
-	std::unique_ptr<std::string> key;
-    JsonPair(std::string *k);
+	const std::string* key;
+    JsonPair(JsonState *, char *);
 
     virtual ~JsonPair();
     virtual std::ostream &print(std::ostream &os) const;
@@ -89,7 +90,7 @@ struct JsonObject : public JsonValue {
 
     JsonObject();
 
-    std::map<std::string, JsonValue*> ptrTable;
+    std::map<const std::string*, JsonValue*> ptrTable;
 
     virtual std::ostream &print(std::ostream &os) const;
     virtual std::ostream &printJson(std::ostream &os) const;
@@ -111,8 +112,8 @@ struct JsonArray : public JsonValue {
 };
 
 struct JsonString : public JsonValue {
-	std::unique_ptr<std::string> value;
-    JsonString(std::string *s);
+    const std::string* value;
+    JsonString(JsonState *, char *);
     ~JsonString();
 
     virtual std::ostream &print(std::ostream &os) const;
@@ -146,14 +147,19 @@ struct JsonState {
 	JsonValue *value;
     std::deque< std::unique_ptr<JsonValue> > objList;
 
+    std::set< std::string > strPool;
+
     JsonState();
     ~JsonState();
 
-    template <class T, class... Args> T *newObject(Args &&... args) {
+    const std::string * getString( const char * );
+
+    template <class T, class... Args> T *newObject(Args && ... args) {
         static_assert(std::is_base_of<JsonValue, T>::value,
                       "must derived from JsonValue");
 
         auto p = std::make_unique<T>( std::forward<Args>(args)... ) ;
+        //auto p = std::unique_ptr<T>( ) ;
         objList.push_back( std::move(p) );
 
         return static_cast<T*>(objList.back().get());

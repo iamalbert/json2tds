@@ -6,7 +6,7 @@ LUA_HOME := $(realpath $(dir $(shell which th))../)
 LUA_INCDIR ?= $(LUA_HOME)/include
 LUA_LIBDIR ?= $(LUA_HOME)/lib
 
-CXXFLAGS ?= -Wall -pedantic -Wno-deprecated-register -O2 -std=c++14 -I$(LUA_HOME)/include
+CXXFLAGS ?= -Wall -pedantic -Wno-deprecated-register -std=c++14 -I$(LUA_HOME)/include
 
 all: libcjson.so
 
@@ -16,7 +16,10 @@ install: libcjson.so
 
 
 libcjson.so: cjson.cpp parser.o token.o JsonNode.o
-	$(CXX) $(CXXFLAGS) -fPIC -shared -o $@ $^ -ll
+	$(CXX) $(CXXFLAGS) -O2 -fPIC -shared -o $@ $^ -ll
+
+testcpp: test.cpp libcjson.so parser.o token.o JsonNode.o
+	$(CXX) $(CXXFLAGS) -g -o $@ $^ -ll -L$(LUA_LIBDIR) -lluajit
 
 %.o: %.cpp token.h parser.hpp
 	$(CXX) -fPIC -shared -c $(CXXFLAGS) -o $@ $<
@@ -30,4 +33,4 @@ parser.cpp: parser.y
 	bison -d -o $@ $<
 
 clean:
-	rm -f token.cpp token.h parser.cpp *.o *.so
+	rm -f token.cpp token.h parser.cpp *.o *.so testcpp

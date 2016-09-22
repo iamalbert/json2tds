@@ -31,7 +31,7 @@
 %union {
     JsonValue * value;
 
-    std::string * strval;
+    char * strval;
     double numval;
     int token;
 }
@@ -79,7 +79,7 @@ elements: element {
     }
 ;
 element: T_STRING {
-        $$ = state->newObject<JsonString>($1);
+        $$ = state->newObject<JsonString>(state, $1);
     }| T_NUMBER {
         $$ = state->newObject<JsonNumber>($1);
     }| T_TRUE {
@@ -113,7 +113,7 @@ members: member {
        }
 ;
 member: T_STRING T_COLON element {
-    $$ = state->newObject<JsonPair>($1);
+    $$ = state->newObject<JsonPair>(state ,$1);
 	$$->member =  $3;
 }
 ;
