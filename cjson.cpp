@@ -42,26 +42,26 @@ METHOD_DECLARE(__len){
 }
 
 METHOD_DECLARE(new){
-	JsonValue** addr = (JsonValue**) lua_newuserdata(L, sizeof(JsonValue*) );
+	JsonValue** self = (JsonValue**) lua_newuserdata(L, sizeof(JsonValue*) );
 	luaL_getmetatable(L, PACKAGE_NAME_STR);
 	lua_setmetatable(L, -2);
 
-	*addr = new JsonValue(10000);
+	*self = new JsonValue(10000);
 
 	return 1;
 }
 
 METHOD_DECLARE(getVal){
-	JsonValue *addr = *(JsonValue**)luaL_checkudata(L, 1, PACKAGE_NAME_STR);
+	JsonValue *self = *(JsonValue**)luaL_checkudata(L, 1, PACKAGE_NAME_STR);
 
-	lua_pushnumber(L, addr->value);
+	lua_pushnumber(L, self->value);
 	return 1;
 }
 
 METHOD_DECLARE(__gc){
-	JsonValue *addr = *(JsonValue**)luaL_checkudata(L, 1, PACKAGE_NAME_STR);
+	JsonValue *self = *(JsonValue**)luaL_checkudata(L, 1, PACKAGE_NAME_STR);
 
-	delete addr;
+	delete self;
 
 	return 1;
 }
@@ -82,7 +82,6 @@ int luaopen_cjson(LS){
 	ADD_METHOD(new);
 
 	lua_newtable(L);
-	ADD_METHOD(getVal);
     lua_setfield(L, -2, "__index");
 
 	return 1;
