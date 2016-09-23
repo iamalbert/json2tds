@@ -42,7 +42,7 @@ struct JsonValue {
     JsonValue();
     JsonValue(char);
 
-    ~JsonValue();
+    virtual ~JsonValue() = default;
 
     virtual int toLuaObject(LS);
 
@@ -84,7 +84,6 @@ struct JsonArray : public JsonValue {
 struct JsonString : public JsonValue {
     const char* value;
     JsonString(const char *);
-    ~JsonString();
 
     virtual int toLuaObject(LS);
 };
@@ -107,12 +106,12 @@ struct JsonNull : public JsonValue {
 
 struct JsonState {
 	JsonValue *value;
-    std::deque< std::unique_ptr<JsonValue> > objList;
 
+    std::deque< std::unique_ptr<JsonValue> > objList;
     std::unordered_set< std::string > strPool;
 
     JsonState();
-    ~JsonState();
+    ~JsonState() = default;
 
     const char * getString( const char * );
     const char * getString( std::string & );
@@ -132,12 +131,6 @@ struct JsonState {
     //JsonValue *getJsonValue() const;
 
     void free();
-};
-
-struct JsonException : public std::runtime_error {
-    template <class... Args>
-    JsonException(Args &&... args)
-        : std::runtime_error(std::forward<Args>(args)...) {}
 };
 
 JsonState* parse_json(FILE *);

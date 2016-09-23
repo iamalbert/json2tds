@@ -18,9 +18,13 @@ int main(int argc, char** argv){
     }
     puts("done");
 
+    getchar();
+
     delete state;
 
     puts("close");
     if( fp != NULL ) fclose(fp);
+
+    getchar();
     return 0;
 }

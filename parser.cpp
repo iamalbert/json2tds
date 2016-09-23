@@ -1637,7 +1637,7 @@ void yyerror(yyscan_t scanner, JsonState *state, const char * err ) {
 	char msg[BUFSIZ];
 	sprintf(msg, "Line: %d, Token: %s, Error: %s\n", 
 		yyget_lineno(scanner), yyget_text(scanner), err );
-	throw JsonException(msg);
+	throw std::runtime_error(msg);
 }
 
 JsonState* parse_json( FILE * fp ){

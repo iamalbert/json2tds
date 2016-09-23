@@ -7,9 +7,6 @@ JsonValue::JsonValue(char c) : type(c),
 {
 	//printf("value %c\n", c);
 }
-JsonValue::~JsonValue() {
-   //printf("wiped %c\n", type);
-}
 
 const char * JsonValue::typeString() const {
     switch(type){
@@ -66,7 +63,6 @@ int JsonArray::toLuaObject(LS) {
 
 JsonString::JsonString(const char * s) : JsonValue('s'), value(s) {
 }
-JsonString::~JsonString() {}
 
 int JsonString::toLuaObject(LS) {
     lua_pushstring(L, value );
@@ -98,11 +94,6 @@ int JsonNull::toLuaObject(LS) {
 }
 
 JsonState::JsonState() : value(nullptr) {
-	//puts("value state");
-}
-JsonState::~JsonState() {
-    //printf("wiped state, size: %lu\n", objList.size() );
-    objList.clear();
 }
 const char * JsonState::getString( const char * str ){
 	//for( auto & v : strPool ){ std::cout << "g:" << v << " " << &v << "\n"; }

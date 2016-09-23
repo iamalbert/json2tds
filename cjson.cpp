@@ -80,10 +80,12 @@ METHOD_DECLARE(load){
 
 METHOD_DECLARE(__gc){
     //puts("__gc is called");
-    JsonValue *self = *(JsonValue**)luaL_checkudata(L, 1, PACKAGE_NAME_STR);
+    JsonValue **self_ = (JsonValue**) luaL_checkudata(L, 1, PACKAGE_NAME_STR);
+    JsonValue *self = *self_;
 
 	if ( self->isRoot ){
 		delete self->root;
+        self_ = 0;
 	}
 
     return 1;

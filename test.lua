@@ -1,6 +1,15 @@
 JSON = require 'torch-cjson'
 print(JSON)
 
+io.read()
+print "start"
+
+obj = JSON.load "e.json"
+print(#obj)
+io.read()
+obj = nil; collectgarbage();
+io.read()
+
 obj = JSON.loads '[2, [34, [9, 0] ], null, 1.2, 302.00, true, false, "hi", "\\\\" ]'
 print(obj)
 print("#obj", #obj)
@@ -8,6 +17,10 @@ print(JSON.totable(obj))
 for k,v in ipairs(obj) do
     print(k, v)
 end
+
+io.read()
+obj = nil; collectgarbage();
+io.read()
 
 obj = JSON.loads [[
 {
@@ -52,3 +65,7 @@ print(obj)
 -- print("size", #obj)
 -- print(obj)
 -- for k,v in pairs(obj) do print(k, v) end
+
+io.read()
+obj = nil; collectgarbage();
+io.read()
