@@ -62,46 +62,45 @@ start: element {
 }
 
 array: T_LEFT_BRAK elements T_RIGHT_BRAK { 
-        printf("arr\n");
+        //printf("arr\n");
         $$ = $2;
     }| T_LEFT_BRAK T_RIGHT_BRAK { 
         $$ = state->newObject<JsonArray>();
     }
 ;
 elements: element {
-        printf("ele %c\n", $1->type );
+        //printf("ele %c\n", $1->type );
         $$ = state->newObject<JsonArray>();
         $$->as<JsonArray>()->ptrVec.push_back($1);
 
     }| elements T_COMMA element {
-        printf("eles(%c) ele(%c)\n", $1->type, $3->type);
+        //printf("eles(%c) ele(%c)\n", $1->type, $3->type);
         $1->as<JsonArray>()->ptrVec.push_back($3);
         $$ = $1;
     }
 ;
 object: T_LEFT_CUR members T_RIGHT_CUR { 
-		$$ = state->newObject<JsonObject>();
-        $$->member = $2;
-		((JsonObject*)$$)->list2map();
-        puts("obj");
+        //puts("obj");
+        $$ = $2;
     }| T_LEFT_CUR T_RIGHT_CUR {
 	    $$ = state->newObject<JsonObject>();
     }
 ;
 members: member {
-        $$ = $1;
-        printf("mem(%s:%c)\n", $1->as<JsonPair>()->key->c_str(), $1->member->type);
+        $$ = state->newObject<JsonObject>();
+        $$->as<JsonObject>()->ptrTable[ ($1->as<JsonPair>()->key) ] = $1->member ;
+        //printf("mem(%s:%c)\n", $1->as<JsonPair>()->key->c_str(), $1->member->type);
     }|   members T_COMMA member {
-        $3->next = $1;
-        $$ = $3;
-        printf("mems(%s:%c) ", $1->as<JsonPair>()->key->c_str(), $1->member->type);
-        printf("mem(%s:%c)\n", $3->as<JsonPair>()->key->c_str(), $3->member->type);
+        //printf("mems mem(%s:%c)\n", $3->as<JsonPair>()->key->c_str(), $3->member->type);
+        $1->as<JsonObject>()->ptrTable[($3->as<JsonPair>()->key)] = $3->member ;
+        $$ = $1;
     }
 ;
 member: T_STRING T_COLON element {
     $$ = state->newObject<JsonPair>(state ,$1);
 	$$->member =  $3;
     delete (std::string*) $1;
+    //printf("*mem(%s:%c)\n", $$->as<JsonPair>()->key->c_str(), $$->member->type);
 }
 ;
 element: T_STRING {

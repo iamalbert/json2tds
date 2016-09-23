@@ -29,32 +29,29 @@ struct JsonState;
 
 struct JsonValue {
     char type;
-    JsonValue *next, *member, *tail;
+    JsonValue *member;
     JsonState *root;
+
 	bool isRoot = false;
 
     JsonValue();
     JsonValue(char);
 
-
-
-    virtual ~JsonValue();
-
-    virtual void breakLinks();
+    ~JsonValue();
 
     virtual int toLuaObject(LS);
-    int asLuaObject(LS);
 
+    int asLuaObject(LS);
     int luaGet(LS);
     int luaLen(LS);
+
     bool isBaseType() const;
+
     const char * typeString() const;
 
     template<class T> T* as(){
         return dynamic_cast<T*>(this);
     }
-
-    JsonValue *reverse_member();
 
 };
 
@@ -64,7 +61,7 @@ struct JsonPair : public JsonValue {
 	const std::string* key;
     JsonPair(JsonState *, std::string *);
 
-    virtual ~JsonPair();
+    ~JsonPair();
 
     virtual int toLuaObject(LS);
 };
@@ -76,7 +73,6 @@ struct JsonObject : public JsonValue {
     std::unordered_map<const std::string*, JsonValue*> ptrTable;
 
     virtual int toLuaObject(LS);
-    void list2map();
 };
 
 struct JsonArray : public JsonValue {
@@ -87,7 +83,6 @@ struct JsonArray : public JsonValue {
 
     virtual int toLuaObject(LS);
 
-    void list2vector();
 };
 
 struct JsonString : public JsonValue {

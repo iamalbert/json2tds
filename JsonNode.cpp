@@ -3,8 +3,8 @@
 
 JsonValue::JsonValue() : JsonValue('?') {}
 JsonValue::JsonValue(char c) : type(c), 
-    next(nullptr), member(nullptr), 
-    tail(nullptr),root(nullptr) 
+    member(nullptr), 
+    root(nullptr) 
 {
 	//printf("value %c\n", c);
 }
@@ -22,26 +22,6 @@ const char * JsonValue::typeString() const {
         default:
                   return "JsonUnknownType";
     }
-}
-void JsonValue::breakLinks() {
-    next = nullptr;
-    member = nullptr;
-}
-JsonValue* JsonValue::reverse_member(){
-    JsonValue  
-        *curr = member,
-        *next = nullptr,
-        *prev = nullptr;
-
-    while( curr ){
-        next = curr->next;
-        curr->next = prev;
-
-        prev = curr;
-        curr = next;
-    }
-    member = prev;
-    return this;
 }
 int JsonValue::toLuaObject(LS) {
     throw std::runtime_error("toLuaObject this node should be overriden");
@@ -78,11 +58,6 @@ int JsonObject::toLuaObject(LS) {
     }
     return 1;
 }
-void JsonObject::list2map(){
-    for (JsonPair *ele = (JsonPair *)member; ele; ele = (JsonPair *)ele->next) {
-        ptrTable[ ele->key ] = ele->member;
-    }
-}
 
 /////////
 
@@ -97,11 +72,6 @@ int JsonArray::toLuaObject(LS) {
         idx++;
     }
     return 1;
-}
-void JsonArray::list2vector(){
-    for (JsonValue *ele = member; ele; ele = ele->next) {
-        ptrVec.push_back(ele);
-    }
 }
 
 /////
