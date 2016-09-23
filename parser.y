@@ -45,9 +45,9 @@
 %token T_UNIDENTIFY
     
 
-%type <value> array object elements element 
-%type <value> members 
-
+%type <value>  array object
+%type <strval> string
+%type <value>  members elements element 
 
 %start start
 
@@ -83,21 +83,25 @@ object: T_LEFT_CUR members T_RIGHT_CUR {
 	    $$ = state->newObject<JsonObject>();
     }
 ;
-members: T_STRING T_COLON element  {
+members: string T_COLON element  {
         $$ = state->newObject<JsonObject>();
 
         $$->as<JsonObject>()->ptrTable[ state->getString($1) ] = $3 ;
 
         //delete (std::string*) $1;
         //printf("mem(%s:%c)\n", $1->as<JsonPair>()->key->c_str(), $1->member->type);
-    }|   members T_COMMA T_STRING T_COLON element {
+    }|   members T_COMMA string T_COLON element {
         $1->as<JsonObject>()->ptrTable[ state->getString($3) ] = $5;
         //delete (std::string*) $1;
         $$ = $1;
     }
 ;
-element: T_STRING {
-        $$ = state->newObject<JsonString>(state, $1 );
+string : T_STRING {
+    $$ = state->getString($1);
+    free((void*)$1);
+}
+element: string {
+        $$ = state->newObject<JsonString>($1);
     }| T_NUMBER {
         $$ = state->newObject<JsonNumber>($1);
     }| T_TRUE {

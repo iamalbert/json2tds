@@ -65,8 +65,7 @@ int JsonArray::toLuaObject(LS) {
 
 /////
 
-JsonString::JsonString(JsonState * state, const char * s) : JsonValue('s') {
-    value = state->getString(s);
+JsonString::JsonString(const char * s) : JsonValue('s'), value(s) {
 }
 JsonString::~JsonString() {}
 
@@ -110,7 +109,7 @@ const char * JsonState::getString( const char * str ){
 	//for( auto & v : strPool ){ std::cout << "g:" << v << " " << &v << "\n"; }
 	//std::cout << std::string(str) << "\n";
 	auto s = strPool.insert(str);
-	//std::cout << str << " " <<  s.second << "\n";
+    //printf("getstring: `%s', %p, %d\n", s.first->data(), (void*)s.first->data(), s.second);
     return s.first->data();
 }
 const char * JsonState::getString( std::string & str ){

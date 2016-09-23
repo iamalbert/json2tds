@@ -30,7 +30,7 @@ unsigned long int hex2int(char * b ){
     return strtoul( b, NULL, 16 );
 }
 
-char * escape_str(char * first, size_t len){
+size_t escape_str(char * first, size_t len){
     char * last = first + len;
     char * org_first = first;
     char * pos = first;
@@ -79,7 +79,7 @@ char * escape_str(char * first, size_t len){
         }
     }
     *pos = '\0';
-    return org_first;
+    return pos - org_first;
 }
 
 %}
@@ -120,7 +120,13 @@ CHARS           {CHAR}+
 
 {DBL_QUOTE}{DBL_QUOTE} |
 {DBL_QUOTE}{CHARS}{DBL_QUOTE} { 
-	yylval->strval = escape_str(yytext+1, yyleng-2);
+    size_t len = escape_str(yytext+1, yyleng-2);
+
+    char * newbuf = (char*) malloc(len+1);
+    strcpy( newbuf , yytext+1);
+    
+	yylval->strval = newbuf;
+
     TOKEN(T_STRING);
 };
 

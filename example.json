@@ -1,12 +1,9 @@
 [
 1,2,3,
 true,
-{ "asdf": "2", "axcv": true,
-    "arr": [0,1,2],
-    "obj": {
-        "nested": { "haha":"ok" }
-    }
-},
+{ "asdf": "2", "axcv": true },
+{ "asdf": "2", "axcv": true },
+{ "asdf": "2", "axcv": true },
 null, [""],
 3
 ]

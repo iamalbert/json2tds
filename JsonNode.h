@@ -84,7 +84,7 @@ struct JsonArray : public JsonValue {
 
 struct JsonString : public JsonValue {
     const char* value;
-    JsonString(JsonState *, const char *);
+    JsonString(const char *);
     ~JsonString();
 
     virtual int toLuaObject(LS);
