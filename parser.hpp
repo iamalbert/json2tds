@@ -66,11 +66,11 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 30 "parser.y" /* yacc.c:1909  */
+#line 27 "parser.y" /* yacc.c:1909  */
 
     JsonValue * value;
 
-    std::string * strval;
+    const char* strval;
     double numval;
     int token;
 

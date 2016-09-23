@@ -116,7 +116,7 @@ METHOD_DECLARE(keys){
     int i = 1;
     for ( auto & kv : self->as<JsonObject>()->ptrTable ){
         lua_pushinteger(L, i);
-        lua_pushstring(L, kv.first->c_str() );
+        lua_pushstring(L, kv.first );
         lua_settable(L, -3);
         i+=1;
     }
@@ -184,7 +184,7 @@ int JsonValue::luaGet(LS){
             const char *cstr = luaL_checklstring(L, 2, &len);
 			//printf("cst: %s\n",  cstr );
 
-            const std::string *  key = root->getString(cstr);
+            const char *  key = root->getString(cstr);
 
 			//printf("key: %p\n", key);
 

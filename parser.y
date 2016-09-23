@@ -8,11 +8,8 @@
     #include "parser.hpp"
     #include "token.h"
 
-
-
     extern int yylex(YYSTYPE * yylval, yyscan_t  scanner );
     extern void yyerror(yyscan_t scanner, JsonState*, const char *);
-
 
 %}
 
@@ -30,7 +27,7 @@
 %union {
     JsonValue * value;
 
-    std::string * strval;
+    const char* strval;
     double numval;
     int token;
 }
@@ -49,7 +46,7 @@
     
 
 %type <value> array object elements element 
-%type <value> members member
+%type <value> members 
 
 
 %start start
@@ -89,18 +86,18 @@ object: T_LEFT_CUR members T_RIGHT_CUR {
 members: T_STRING T_COLON element  {
         $$ = state->newObject<JsonObject>();
 
-        $$->as<JsonObject>()->ptrTable[ state->getString(*$1) ] = $3 ;
+        $$->as<JsonObject>()->ptrTable[ state->getString($1) ] = $3 ;
 
-        delete (std::string*) $1;
+        //delete (std::string*) $1;
         //printf("mem(%s:%c)\n", $1->as<JsonPair>()->key->c_str(), $1->member->type);
     }|   members T_COMMA T_STRING T_COLON element {
-        $1->as<JsonObject>()->ptrTable[ state->getString(*$3) ] = $5;
+        $1->as<JsonObject>()->ptrTable[ state->getString($3) ] = $5;
+        //delete (std::string*) $1;
         $$ = $1;
     }
 ;
 element: T_STRING {
-        $$ = state->newObject<JsonString>(state, $1);
-        delete (std::string*) $1;
+        $$ = state->newObject<JsonString>(state, $1 );
     }| T_NUMBER {
         $$ = state->newObject<JsonNumber>($1);
     }| T_TRUE {

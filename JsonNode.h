@@ -27,6 +27,12 @@ extern "C" {
 
 struct JsonState;
 
+union JsonBaseType {
+	double n;
+	bool b;
+	char *s;
+};
+
 struct JsonValue {
     char type;
     JsonValue *member;
@@ -57,20 +63,11 @@ struct JsonValue {
 
 struct JsonString;
 
-struct JsonPair : public JsonValue {
-	const std::string* key;
-    JsonPair(JsonState *, std::string *);
-
-    ~JsonPair();
-
-    virtual int toLuaObject(LS);
-};
-
 struct JsonObject : public JsonValue {
 
     JsonObject();
 
-    std::unordered_map<const std::string*, JsonValue*> ptrTable;
+    std::unordered_map<const char* , JsonValue*> ptrTable;
 
     virtual int toLuaObject(LS);
 };
@@ -86,8 +83,8 @@ struct JsonArray : public JsonValue {
 };
 
 struct JsonString : public JsonValue {
-    const std::string* value;
-    JsonString(JsonState *, std::string *);
+    const char* value;
+    JsonString(JsonState *, const char *);
     ~JsonString();
 
     virtual int toLuaObject(LS);
@@ -118,8 +115,8 @@ struct JsonState {
     JsonState();
     ~JsonState();
 
-    const std::string * getString( const char * );
-    const std::string * getString( std::string & );
+    const char * getString( const char * );
+    const char * getString( std::string & );
 
     template <class T, class... Args> T *newObject(Args && ... args) {
         static_assert(std::is_base_of<JsonValue, T>::value,

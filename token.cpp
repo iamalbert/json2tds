@@ -1518,7 +1518,7 @@ case 2:
 YY_RULE_SETUP
 #line 122 "token.l"
 { 
-	yylval->strval = new std::string( escape_str(yytext+1, yyleng-2) );
+	yylval->strval = escape_str(yytext+1, yyleng-2);
     TOKEN(T_STRING);
 };
 	YY_BREAK

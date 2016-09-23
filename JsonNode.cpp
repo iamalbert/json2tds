@@ -35,17 +35,6 @@ int JsonValue::asLuaObject(LS) {
     return 1;
 }
 
-JsonPair::JsonPair(JsonState * state, std::string *s) : JsonValue('p') {
-    key = state->getString(*s);
-}
-JsonPair::~JsonPair() { }
-int JsonPair::toLuaObject(LS) {
-    member->toLuaObject(L);
-    lua_setfield(L, -2, key->c_str());
-    return 1;
-}
-
-
 
 ///////////
 
@@ -54,7 +43,7 @@ int JsonObject::toLuaObject(LS) {
     lua_newtable(L);
     for ( auto & kv : ptrTable ){
         kv.second->toLuaObject(L);
-        lua_setfield(L, -2, kv.first->c_str() );
+        lua_setfield(L, -2, kv.first );
     }
     return 1;
 }
@@ -76,13 +65,13 @@ int JsonArray::toLuaObject(LS) {
 
 /////
 
-JsonString::JsonString(JsonState * state, std::string * s) : JsonValue('s') {
-    value = state->getString(*s);
+JsonString::JsonString(JsonState * state, const char * s) : JsonValue('s') {
+    value = state->getString(s);
 }
 JsonString::~JsonString() {}
 
 int JsonString::toLuaObject(LS) {
-    lua_pushlstring(L, value->data(), value->length());
+    lua_pushstring(L, value );
     return 1;
 }
 
@@ -117,14 +106,14 @@ JsonState::~JsonState() {
     //printf("wiped state, size: %lu\n", objList.size() );
     objList.clear();
 }
-const std::string * JsonState::getString( const char * str ){
+const char * JsonState::getString( const char * str ){
 	//for( auto & v : strPool ){ std::cout << "g:" << v << " " << &v << "\n"; }
 	//std::cout << std::string(str) << "\n";
 	auto s = strPool.insert(str);
 	//std::cout << str << " " <<  s.second << "\n";
-    return &( *s.first );
+    return s.first->data();
 }
-const std::string * JsonState::getString( std::string & str ){
+const char * JsonState::getString( std::string & str ){
 	return getString( str.data() );
 	/*
 	auto s = strPool.insert(str);

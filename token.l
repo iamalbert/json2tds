@@ -120,7 +120,7 @@ CHARS           {CHAR}+
 
 {DBL_QUOTE}{DBL_QUOTE} |
 {DBL_QUOTE}{CHARS}{DBL_QUOTE} { 
-	yylval->strval = new std::string( escape_str(yytext+1, yyleng-2) );
+	yylval->strval = escape_str(yytext+1, yyleng-2);
     TOKEN(T_STRING);
 };
 
