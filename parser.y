@@ -86,22 +86,17 @@ object: T_LEFT_CUR members T_RIGHT_CUR {
 	    $$ = state->newObject<JsonObject>();
     }
 ;
-members: member {
+members: T_STRING T_COLON element  {
         $$ = state->newObject<JsonObject>();
-        $$->as<JsonObject>()->ptrTable[ ($1->as<JsonPair>()->key) ] = $1->member ;
+
+        $$->as<JsonObject>()->ptrTable[ state->getString(*$1) ] = $3 ;
+
+        delete (std::string*) $1;
         //printf("mem(%s:%c)\n", $1->as<JsonPair>()->key->c_str(), $1->member->type);
-    }|   members T_COMMA member {
-        //printf("mems mem(%s:%c)\n", $3->as<JsonPair>()->key->c_str(), $3->member->type);
-        $1->as<JsonObject>()->ptrTable[($3->as<JsonPair>()->key)] = $3->member ;
+    }|   members T_COMMA T_STRING T_COLON element {
+        $1->as<JsonObject>()->ptrTable[ state->getString(*$3) ] = $5;
         $$ = $1;
     }
-;
-member: T_STRING T_COLON element {
-    $$ = state->newObject<JsonPair>(state ,$1);
-	$$->member =  $3;
-    delete (std::string*) $1;
-    //printf("*mem(%s:%c)\n", $$->as<JsonPair>()->key->c_str(), $$->member->type);
-}
 ;
 element: T_STRING {
         $$ = state->newObject<JsonString>(state, $1);
