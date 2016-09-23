@@ -62,41 +62,40 @@ start: element {
 }
 
 array: T_LEFT_BRAK elements T_RIGHT_BRAK { 
-        $$ = state->newObject<JsonArray>();
-        $$->member = $2;
-        //$$->reverse_member();
-		((JsonArray*)$$)->list2vector();
-        printf("arr(%c)\n", $2->type);
+        printf("arr\n");
+        $$ = $2;
     }| T_LEFT_BRAK T_RIGHT_BRAK { 
         $$ = state->newObject<JsonArray>();
     }
 ;
 elements: element {
-        $1->tail = $1;
-        $$ = $1;
         printf("ele %c\n", $1->type );
+        $$ = state->newObject<JsonArray>();
+        $$->as<JsonArray>()->ptrVec.push_back($1);
 
     }| elements T_COMMA element {
-		$1->tail->next = $3; /* the list is concat reversed */
-        $1->tail = $3;
-		$$ = $1;
         printf("eles(%c) ele(%c)\n", $1->type, $3->type);
+        $1->as<JsonArray>()->ptrVec.push_back($3);
+        $$ = $1;
     }
 ;
 object: T_LEFT_CUR members T_RIGHT_CUR { 
 		$$ = state->newObject<JsonObject>();
         $$->member = $2;
-        //$$->reverse_member();
 		((JsonObject*)$$)->list2map();
+        puts("obj");
     }| T_LEFT_CUR T_RIGHT_CUR {
 	    $$ = state->newObject<JsonObject>();
     }
 ;
 members: member {
         $$ = $1;
+        printf("mem(%s:%c)\n", $1->as<JsonPair>()->key->c_str(), $1->member->type);
     }|   members T_COMMA member {
         $3->next = $1;
         $$ = $3;
+        printf("mems(%s:%c) ", $1->as<JsonPair>()->key->c_str(), $1->member->type);
+        printf("mem(%s:%c)\n", $3->as<JsonPair>()->key->c_str(), $3->member->type);
     }
 ;
 member: T_STRING T_COLON element {

@@ -8,6 +8,9 @@ JsonValue::JsonValue(char c) : type(c),
 {
 	//printf("value %c\n", c);
 }
+JsonValue::~JsonValue() {
+   //printf("wiped %c\n", type);
+}
 
 const char * JsonValue::typeString() const {
     switch(type){
@@ -39,9 +42,6 @@ JsonValue* JsonValue::reverse_member(){
     }
     member = prev;
     return this;
-}
-JsonValue::~JsonValue() {
-   //printf("wiped %c\n", type);
 }
 int JsonValue::toLuaObject(LS) {
     throw std::runtime_error("toLuaObject this node should be overriden");
@@ -141,11 +141,11 @@ int JsonNull::toLuaObject(LS) {
 }
 
 JsonState::JsonState() : value(nullptr) {
-	//puts("statec");
+	//puts("value state");
 }
 JsonState::~JsonState() {
+    //printf("wiped state, size: %lu\n", objList.size() );
     objList.clear();
-    //printf("freed, size: %lu\n", objList.size() );
 }
 const std::string * JsonState::getString( const char * str ){
 	//for( auto & v : strPool ){ std::cout << "g:" << v << " " << &v << "\n"; }

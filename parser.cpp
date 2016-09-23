@@ -458,8 +458,8 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    59,    59,    64,    70,    74,    79,    86,    91,    95,
-      97,   102,   108,   111,   113,   115,   117,   119,   121
+       0,    59,    59,    64,    67,    71,    76,    82,    87,    91,
+      94,   101,   107,   110,   112,   114,   116,   118,   120
 };
 #endif
 
@@ -1260,150 +1260,149 @@ yyreduce:
   case 3:
 #line 64 "parser.y" /* yacc.c:1646  */
     { 
-        (yyval.value) = state->newObject<JsonArray>();
-        (yyval.value)->member = (yyvsp[-1].value);
-        //$$->reverse_member();
-		((JsonArray*)(yyval.value))->list2vector();
-        printf("arr(%c)\n", (yyvsp[-1].value)->type);
+        printf("arr\n");
+        (yyval.value) = (yyvsp[-1].value);
     }
-#line 1270 "parser.cpp" /* yacc.c:1646  */
+#line 1267 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 70 "parser.y" /* yacc.c:1646  */
+#line 67 "parser.y" /* yacc.c:1646  */
     { 
         (yyval.value) = state->newObject<JsonArray>();
     }
-#line 1278 "parser.cpp" /* yacc.c:1646  */
+#line 1275 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 74 "parser.y" /* yacc.c:1646  */
+#line 71 "parser.y" /* yacc.c:1646  */
     {
-        (yyvsp[0].value)->tail = (yyvsp[0].value);
-        (yyval.value) = (yyvsp[0].value);
         printf("ele %c\n", (yyvsp[0].value)->type );
+        (yyval.value) = state->newObject<JsonArray>();
+        (yyval.value)->as<JsonArray>()->ptrVec.push_back((yyvsp[0].value));
 
     }
-#line 1289 "parser.cpp" /* yacc.c:1646  */
+#line 1286 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 79 "parser.y" /* yacc.c:1646  */
+#line 76 "parser.y" /* yacc.c:1646  */
     {
-		(yyvsp[-2].value)->tail->next = (yyvsp[0].value); /* the list is concat reversed */
-        (yyvsp[-2].value)->tail = (yyvsp[0].value);
-		(yyval.value) = (yyvsp[-2].value);
         printf("eles(%c) ele(%c)\n", (yyvsp[-2].value)->type, (yyvsp[0].value)->type);
+        (yyvsp[-2].value)->as<JsonArray>()->ptrVec.push_back((yyvsp[0].value));
+        (yyval.value) = (yyvsp[-2].value);
     }
-#line 1300 "parser.cpp" /* yacc.c:1646  */
+#line 1296 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 86 "parser.y" /* yacc.c:1646  */
+#line 82 "parser.y" /* yacc.c:1646  */
     { 
 		(yyval.value) = state->newObject<JsonObject>();
         (yyval.value)->member = (yyvsp[-1].value);
-        //$$->reverse_member();
 		((JsonObject*)(yyval.value))->list2map();
+        puts("obj");
     }
-#line 1311 "parser.cpp" /* yacc.c:1646  */
+#line 1307 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 91 "parser.y" /* yacc.c:1646  */
+#line 87 "parser.y" /* yacc.c:1646  */
     {
 	    (yyval.value) = state->newObject<JsonObject>();
     }
-#line 1319 "parser.cpp" /* yacc.c:1646  */
+#line 1315 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 95 "parser.y" /* yacc.c:1646  */
+#line 91 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = (yyvsp[0].value);
+        printf("mem(%s:%c)\n", (yyvsp[0].value)->as<JsonPair>()->key->c_str(), (yyvsp[0].value)->member->type);
     }
-#line 1327 "parser.cpp" /* yacc.c:1646  */
+#line 1324 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 97 "parser.y" /* yacc.c:1646  */
+#line 94 "parser.y" /* yacc.c:1646  */
     {
         (yyvsp[0].value)->next = (yyvsp[-2].value);
         (yyval.value) = (yyvsp[0].value);
+        printf("mems(%s:%c) ", (yyvsp[-2].value)->as<JsonPair>()->key->c_str(), (yyvsp[-2].value)->member->type);
+        printf("mem(%s:%c)\n", (yyvsp[0].value)->as<JsonPair>()->key->c_str(), (yyvsp[0].value)->member->type);
     }
-#line 1336 "parser.cpp" /* yacc.c:1646  */
+#line 1335 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 102 "parser.y" /* yacc.c:1646  */
+#line 101 "parser.y" /* yacc.c:1646  */
     {
     (yyval.value) = state->newObject<JsonPair>(state ,(yyvsp[-2].strval));
 	(yyval.value)->member =  (yyvsp[0].value);
     delete (std::string*) (yyvsp[-2].strval);
 }
-#line 1346 "parser.cpp" /* yacc.c:1646  */
+#line 1345 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 108 "parser.y" /* yacc.c:1646  */
+#line 107 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = state->newObject<JsonString>(state, (yyvsp[0].strval));
         delete (std::string*) (yyvsp[0].strval);
     }
-#line 1355 "parser.cpp" /* yacc.c:1646  */
+#line 1354 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 111 "parser.y" /* yacc.c:1646  */
+#line 110 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = state->newObject<JsonNumber>((yyvsp[0].numval));
     }
-#line 1363 "parser.cpp" /* yacc.c:1646  */
+#line 1362 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 113 "parser.y" /* yacc.c:1646  */
+#line 112 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = state->newObject<JsonBoolean>(true);
     }
-#line 1371 "parser.cpp" /* yacc.c:1646  */
+#line 1370 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 115 "parser.y" /* yacc.c:1646  */
+#line 114 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = state->newObject<JsonBoolean>(false);
     }
-#line 1379 "parser.cpp" /* yacc.c:1646  */
+#line 1378 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 117 "parser.y" /* yacc.c:1646  */
+#line 116 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = state->newObject<JsonNull>();
     }
-#line 1387 "parser.cpp" /* yacc.c:1646  */
+#line 1386 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 119 "parser.y" /* yacc.c:1646  */
+#line 118 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = (yyvsp[0].value);
     }
-#line 1395 "parser.cpp" /* yacc.c:1646  */
+#line 1394 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 121 "parser.y" /* yacc.c:1646  */
+#line 120 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = (yyvsp[0].value);
     }
-#line 1403 "parser.cpp" /* yacc.c:1646  */
+#line 1402 "parser.cpp" /* yacc.c:1646  */
     break;
 
 
-#line 1407 "parser.cpp" /* yacc.c:1646  */
+#line 1406 "parser.cpp" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1631,7 +1630,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 126 "parser.y" /* yacc.c:1906  */
+#line 125 "parser.y" /* yacc.c:1906  */
 
 
 //extern int yylex(YYSTYPE*);

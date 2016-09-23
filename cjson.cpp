@@ -38,8 +38,6 @@ METHOD_DECLARE(loads){
     *self = state->value;
 
 	// for( auto & v : state->strPool ){ std::cout << "p:" << v << "\n"; }
-
-
     return 1;
 }
 
@@ -81,6 +79,7 @@ METHOD_DECLARE(load){
 }
 
 METHOD_DECLARE(__gc){
+    //puts("__gc is called");
     JsonValue *self = *(JsonValue**)luaL_checkudata(L, 1, PACKAGE_NAME_STR);
 
 	if ( self->isRoot ){
@@ -103,8 +102,9 @@ METHOD_DECLARE(type){
     return 1;
 }
 METHOD_DECLARE(totable){
+    //puts("__totable is called");
     JsonValue *self = *(JsonValue**)luaL_checkudata(L, 1, PACKAGE_NAME_STR);
-    return self->asLuaObject(L);
+    return self->toLuaObject(L);
 }
 METHOD_DECLARE(keys){
     JsonValue *self = *(JsonValue**)luaL_checkudata(L, 1, PACKAGE_NAME_STR);

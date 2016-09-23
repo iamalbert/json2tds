@@ -2,9 +2,8 @@ JSON = require 'torch-cjson'
 print(JSON)
 
 obj = JSON.loads '[2, [34, [9, 0] ], null, 1.2, 302.00, true, false, "hi", "\\\\" ]'
-
-print("size", #obj)
 print(obj)
+print("#obj", #obj)
 print(JSON.totable(obj))
 for k,v in ipairs(obj) do
     print(k, v)
