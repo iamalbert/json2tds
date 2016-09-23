@@ -6,21 +6,21 @@ int main(int argc, char** argv){
 
     FILE * fp = fopen(filename, "rb");
     if ( fp == NULL ){
-        return -1;
+		puts("error open");
     }
-    puts("fopned");
+    puts("fopened");
 
     JsonState *state = parse_json(fp);
 
     if( state->value == NULL ){
+		puts("parse error");
         return -2;
     }
-
     puts("done");
 
     delete state;
 
     puts("close");
-    fclose(fp);
-
+    if( fp != NULL ) fclose(fp);
+    return 0;
 }

@@ -6,9 +6,6 @@
 #include "JsonNode.h"
 #include "parser.hpp"
 
-
-#define SAVE_TOKEN(n) (yylval->strval=new std::string(yytext+n,yyleng-1-n))
-
 //#define DEBUG
 #ifdef DEBUG
     #define TOKEN(t) do{ printf("tok " #t "\t: %s\n",yytext); return(t);}while(0)
@@ -123,8 +120,7 @@ CHARS           {CHAR}+
 
 {DBL_QUOTE}{DBL_QUOTE} |
 {DBL_QUOTE}{CHARS}{DBL_QUOTE} { 
-    yytext[1 + yyleng-2] = '\0';
-	yylval->strval = yytext + 1;
+	yylval->strval = new std::string( escape_str(yytext+1, yyleng-2) );
     TOKEN(T_STRING);
 };
 

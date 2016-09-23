@@ -13,38 +13,25 @@ extern "C" {
 
 #include <vector>
 #include <string>
-#include <iostream>
 #include <exception>
 #include <stdexcept>
 #include <deque>
 #include <memory>
+#include <unordered_map>
+#include <unordered_set>
 #include <map>
 #include <set>
 #include <vector>
 
 #include <cassert>
 
-struct JsonNode;
-
-struct JsonNode {
-    union {
-        int i;
-        double d;
-        char * s;
-        std::map<std::string, JsonNode> o;
-        std::vector<JsonNode> a;
-    } value;
-
-    char type; // i(nt),d(ouble),s(tring),o(bject),a(rray),n(ull)
-};
-
-
 struct JsonState;
 
 struct JsonValue {
     char type;
-    JsonValue *next, *member;
+    JsonValue *next, *member, *tail;
     JsonState *root;
+	bool isRoot = false;
 
     JsonValue();
     JsonValue(char);
@@ -54,13 +41,11 @@ struct JsonValue {
     virtual ~JsonValue();
 
     virtual void breakLinks();
-    virtual std::ostream &print(std::ostream &os) const;
-    virtual std::ostream &printJson(std::ostream &os) const;
 
     virtual int toLuaObject(LS);
     int asLuaObject(LS);
 
-    int luaGet(LS, JsonState * = 0);
+    int luaGet(LS);
     int luaLen(LS);
     bool isBaseType() const;
     const char * typeString() const;
@@ -77,11 +62,9 @@ struct JsonString;
 
 struct JsonPair : public JsonValue {
 	const std::string* key;
-    JsonPair(JsonState *, char *);
+    JsonPair(JsonState *, std::string *);
 
     virtual ~JsonPair();
-    virtual std::ostream &print(std::ostream &os) const;
-    virtual std::ostream &printJson(std::ostream &os) const;
 
     virtual int toLuaObject(LS);
 };
@@ -90,10 +73,8 @@ struct JsonObject : public JsonValue {
 
     JsonObject();
 
-    std::map<const std::string*, JsonValue*> ptrTable;
+    std::unordered_map<const std::string*, JsonValue*> ptrTable;
 
-    virtual std::ostream &print(std::ostream &os) const;
-    virtual std::ostream &printJson(std::ostream &os) const;
     virtual int toLuaObject(LS);
     void list2map();
 };
@@ -104,8 +85,6 @@ struct JsonArray : public JsonValue {
 
     JsonArray();
 
-    virtual std::ostream &print(std::ostream &os) const;
-    virtual std::ostream &printJson(std::ostream &os) const;
     virtual int toLuaObject(LS);
 
     void list2vector();
@@ -113,33 +92,25 @@ struct JsonArray : public JsonValue {
 
 struct JsonString : public JsonValue {
     const std::string* value;
-    JsonString(JsonState *, char *);
+    JsonString(JsonState *, std::string *);
     ~JsonString();
 
-    virtual std::ostream &print(std::ostream &os) const;
-    virtual std::ostream &printJson(std::ostream &os) const;
     virtual int toLuaObject(LS);
 };
 struct JsonNumber : public JsonValue {
     double value;
     JsonNumber(double v);
-    virtual std::ostream &print(std::ostream &os) const;
-    virtual std::ostream &printJson(std::ostream &os) const;
     virtual int toLuaObject(LS);
 };
 struct JsonBoolean : public JsonValue {
     bool value;
     JsonBoolean(bool b);
-    virtual std::ostream &print(std::ostream &os) const;
-    virtual std::ostream &printJson(std::ostream &os) const;
     virtual int toLuaObject(LS);
 };
 struct JsonNull : public JsonValue {
 
     JsonNull();
 
-    virtual std::ostream &print(std::ostream &os) const;
-    virtual std::ostream &printJson(std::ostream &os) const;
     virtual int toLuaObject(LS);
 };
 
@@ -147,18 +118,20 @@ struct JsonState {
 	JsonValue *value;
     std::deque< std::unique_ptr<JsonValue> > objList;
 
-    std::set< std::string > strPool;
+    std::unordered_set< std::string > strPool;
 
     JsonState();
     ~JsonState();
 
     const std::string * getString( const char * );
+    const std::string * getString( std::string & );
 
     template <class T, class... Args> T *newObject(Args && ... args) {
         static_assert(std::is_base_of<JsonValue, T>::value,
                       "must derived from JsonValue");
 
         auto p = std::make_unique<T>( std::forward<Args>(args)... ) ;
+		p->root = this;
         //auto p = std::unique_ptr<T>( ) ;
         objList.push_back( std::move(p) );
 
@@ -180,3 +153,4 @@ JsonState* parse_json(FILE *);
 JsonState* parse_json_string(const char *);
 
 #endif
+

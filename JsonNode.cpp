@@ -2,7 +2,12 @@
 
 
 JsonValue::JsonValue() : JsonValue('?') {}
-JsonValue::JsonValue(char c) : type(c), next(nullptr), member(nullptr), root(nullptr) {}
+JsonValue::JsonValue(char c) : type(c), 
+    next(nullptr), member(nullptr), 
+    tail(nullptr),root(nullptr) 
+{
+	//printf("value %c\n", c);
+}
 
 const char * JsonValue::typeString() const {
     switch(type){
@@ -36,13 +41,7 @@ JsonValue* JsonValue::reverse_member(){
     return this;
 }
 JsonValue::~JsonValue() {
-    //puts("wiped");
-}
-std::ostream &JsonValue::print(std::ostream &os) const {
-    return os << "[JsonValue]";
-}
-std::ostream &JsonValue::printJson(std::ostream &os) const {
-    throw std::runtime_error("printJson this node should be overriden");
+   //printf("wiped %c\n", type);
 }
 int JsonValue::toLuaObject(LS) {
     throw std::runtime_error("toLuaObject this node should be overriden");
@@ -56,20 +55,10 @@ int JsonValue::asLuaObject(LS) {
     return 1;
 }
 
-JsonPair::JsonPair(JsonState * state, char *s) : JsonValue('p') {
-    key = state->getString(s);
+JsonPair::JsonPair(JsonState * state, std::string *s) : JsonValue('p') {
+    key = state->getString(*s);
 }
 JsonPair::~JsonPair() { }
-std::ostream &JsonPair::print(std::ostream &os) const {
-    os << "\"" << *key << "\"=>";
-    member->print(os);
-    return os;
-}
-std::ostream &JsonPair::printJson(std::ostream &os) const {
-    os << "\"" << *key << "\":";
-    member->printJson(os);
-    return os;
-}
 int JsonPair::toLuaObject(LS) {
     member->toLuaObject(L);
     lua_setfield(L, -2, key->c_str());
@@ -81,25 +70,6 @@ int JsonPair::toLuaObject(LS) {
 ///////////
 
 JsonObject::JsonObject() : JsonValue('o') {}
-std::ostream &JsonObject::print(std::ostream &os) const {
-    os << "{JsonObject:";
-    for (JsonValue *ele = member; ele; ele = ele->next) {
-        os << " ";
-        ele->print(os);
-    }
-    os << "}";
-    return os;
-}
-std::ostream &JsonObject::printJson(std::ostream &os) const {
-    os << "{";
-    for (JsonValue *ele = member; ele; ele = ele->next) {
-        ele->printJson(os);
-        if (ele->next)
-            os << ",";
-    }
-    os << "}";
-    return os;
-}
 int JsonObject::toLuaObject(LS) {
     lua_newtable(L);
     for ( auto & kv : ptrTable ){
@@ -118,25 +88,6 @@ void JsonObject::list2map(){
 
 JsonArray::JsonArray() : JsonValue('a') {}
 
-std::ostream &JsonArray::print(std::ostream &os) const {
-    os << "[JsonArray:";
-    for (JsonValue *ele = member; ele; ele = ele->next) {
-        os << " ";
-        ele->print(os);
-    }
-    os << "]";
-    return os;
-}
-std::ostream &JsonArray::printJson(std::ostream &os) const {
-    os << "[";
-    for (JsonValue *ele = member; ele; ele = ele->next) {
-        ele->printJson(os);
-        if (ele->next)
-            os << ",";
-    }
-    os << "]";
-    return os;
-}
 int JsonArray::toLuaObject(LS) {
     lua_newtable(L);
     int idx = 1;
@@ -155,18 +106,11 @@ void JsonArray::list2vector(){
 
 /////
 
-JsonString::JsonString(JsonState * state, char * s) : JsonValue('s') {
-    value = state->getString(s);
-    s = nullptr;
+JsonString::JsonString(JsonState * state, std::string * s) : JsonValue('s') {
+    value = state->getString(*s);
 }
 JsonString::~JsonString() {}
 
-std::ostream &JsonString::print(std::ostream &os) const {
-    return os << "[JsonString: \"" << *value << "\"]";
-}
-std::ostream &JsonString::printJson(std::ostream &os) const {
-    return os << "\"" << *value << "\"";
-}
 int JsonString::toLuaObject(LS) {
     lua_pushlstring(L, value->data(), value->length());
     return 1;
@@ -175,12 +119,6 @@ int JsonString::toLuaObject(LS) {
 //////
 
 JsonNumber::JsonNumber(double v) : JsonValue('n'), value(v) {}
-std::ostream &JsonNumber::print(std::ostream &os) const {
-    return os << "[JsonNumber: " << value << "]";
-}
-std::ostream &JsonNumber::printJson(std::ostream &os) const {
-    return os << value;
-}
 int JsonNumber::toLuaObject(LS) {
     lua_pushnumber(L, value);
     return 1;
@@ -189,12 +127,6 @@ int JsonNumber::toLuaObject(LS) {
 ///
 
 JsonBoolean::JsonBoolean(bool b) : JsonValue('b'), value(b) {}
-std::ostream &JsonBoolean::print(std::ostream &os) const {
-    return os << "[JsonBoolean: " << (value ? "true" : "false") << "]";
-}
-std::ostream &JsonBoolean::printJson(std::ostream &os) const {
-    return os << (value ? "true" : "false");
-}
 int JsonBoolean::toLuaObject(LS) {
     lua_pushboolean(L, value);
     return 1;
@@ -203,25 +135,31 @@ int JsonBoolean::toLuaObject(LS) {
 //////// JsonNull
 
 JsonNull::JsonNull() : JsonValue('x') {}
-
-std::ostream &JsonNull::print(std::ostream &os) const {
-    return os << "[JsonNull]";
-}
-std::ostream &JsonNull::printJson(std::ostream &os) const {
-    return os << "null";
-}
 int JsonNull::toLuaObject(LS) {
     lua_pushnil(L);
     return 1;
 }
 
-JsonState::JsonState() : value(nullptr) {}
+JsonState::JsonState() : value(nullptr) {
+	//puts("statec");
+}
 JsonState::~JsonState() {
     objList.clear();
-    printf("freed, size: %lu\n", objList.size() );
+    //printf("freed, size: %lu\n", objList.size() );
 }
 const std::string * JsonState::getString( const char * str ){
-    return &(*strPool.insert(str).first);
+	//for( auto & v : strPool ){ std::cout << "g:" << v << " " << &v << "\n"; }
+	//std::cout << std::string(str) << "\n";
+	auto s = strPool.insert(str);
+	//std::cout << str << " " <<  s.second << "\n";
+    return &( *s.first );
+}
+const std::string * JsonState::getString( std::string & str ){
+	return getString( str.data() );
+	/*
+	auto s = strPool.insert(str);
+    return &( *s.first );
+	*/
 }
 
 //JsonValue *JsonState::getJsonValue() const { return value.get(); }

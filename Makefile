@@ -19,7 +19,7 @@ libcjson.so: cjson.cpp parser.o token.o JsonNode.o
 	$(CXX) $(CXXFLAGS) -O2 -fPIC -shared -o $@ $^ -ll
 
 testcpp: test.cpp libcjson.so parser.o token.o JsonNode.o
-	$(CXX) $(CXXFLAGS) -g -o $@ $^ -ll -L$(LUA_LIBDIR) -lluajit
+	$(CXX) $(CXXFLAGS) -pg -o $@ $^ -ll -L$(LUA_LIBDIR) -lluajit
 
 %.o: %.cpp token.h parser.hpp
 	$(CXX) -fPIC -shared -c $(CXXFLAGS) -o $@ $<

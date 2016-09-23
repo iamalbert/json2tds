@@ -37,6 +37,9 @@ METHOD_DECLARE(loads){
     printf("size : %lu\n", state->objList.size() );
     *self = state->value;
 
+	// for( auto & v : state->strPool ){ std::cout << "p:" << v << "\n"; }
+
+
     return 1;
 }
 
@@ -62,11 +65,13 @@ METHOD_DECLARE(load){
     
     printf("size : %lu\n", state->objList.size() );
 
+	/*
     for( auto & val : state->objList ){
         if ( val->type == 'p' ){
             delete val.release();
         }
     }
+	*/
 
     fclose(fp);
 
@@ -78,7 +83,9 @@ METHOD_DECLARE(load){
 METHOD_DECLARE(__gc){
     JsonValue *self = *(JsonValue**)luaL_checkudata(L, 1, PACKAGE_NAME_STR);
 
-    delete self->root;
+	if ( self->isRoot ){
+		delete self->root;
+	}
 
     return 1;
 }
@@ -160,8 +167,9 @@ int JsonValue::luaLen(LS){
     luaL_error(L, "unknown");
     return 0;
 }
-int JsonValue::luaGet(LS, JsonState *state ){
+int JsonValue::luaGet(LS){
 
+	//puts("called");
     switch(type){
         case 'n': 
         case 'b': 
@@ -174,8 +182,11 @@ int JsonValue::luaGet(LS, JsonState *state ){
         case 'o': {
             size_t len;
             const char *cstr = luaL_checklstring(L, 2, &len);
+			//printf("cst: %s\n",  cstr );
 
-            const std::string *  key = state->getString(cstr);
+            const std::string *  key = root->getString(cstr);
+
+			//printf("key: %p\n", key);
 
             JsonObject * self = as<JsonObject>();
 
@@ -183,6 +194,7 @@ int JsonValue::luaGet(LS, JsonState *state ){
                 luaL_error(L, "no such key `%s'", cstr);
                 return 0;
             }else{
+				//puts("found");
                 JsonValue * ele = self->ptrTable[key];
                 if( ele->isBaseType() ){
                     return ele->toLuaObject(L);

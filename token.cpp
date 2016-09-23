@@ -9,7 +9,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 39
+#define YY_FLEX_SUBMINOR_VERSION 35
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -179,11 +179,6 @@ typedef void* yyscan_t;
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
-#ifndef YY_TYPEDEF_YY_SIZE_T
-#define YY_TYPEDEF_YY_SIZE_T
-typedef size_t yy_size_t;
-#endif
-
 #define EOB_ACT_CONTINUE_SCAN 0
 #define EOB_ACT_END_OF_FILE 1
 #define EOB_ACT_LAST_MATCH 2
@@ -200,13 +195,6 @@ typedef size_t yy_size_t;
                 int yyl;\
                 for ( yyl = n; yyl < yyleng; ++yyl )\
                     if ( yytext[yyl] == '\n' )\
-                        --yylineno;\
-            }while(0)
-    #define YY_LINENO_REWIND_TO(dst) \
-            do {\
-                const char *p;\
-                for ( p = yy_cp-1; p >= (dst); --p)\
-                    if ( *p == '\n' )\
                         --yylineno;\
             }while(0)
     
@@ -226,6 +214,11 @@ typedef size_t yy_size_t;
 
 #define unput(c) yyunput( c, yyg->yytext_ptr , yyscanner )
 
+#ifndef YY_TYPEDEF_YY_SIZE_T
+#define YY_TYPEDEF_YY_SIZE_T
+typedef size_t yy_size_t;
+#endif
+
 #ifndef YY_STRUCT_YY_BUFFER_STATE
 #define YY_STRUCT_YY_BUFFER_STATE
 struct yy_buffer_state
@@ -243,7 +236,7 @@ struct yy_buffer_state
 	/* Number of characters read into yy_ch_buf, not including EOB
 	 * characters.
 	 */
-	yy_size_t yy_n_chars;
+	int yy_n_chars;
 
 	/* Whether we "own" the buffer - i.e., we know we created it,
 	 * and can realloc() it to grow it, and should free() it to
@@ -322,7 +315,7 @@ static void yy_init_buffer (YY_BUFFER_STATE b,FILE *file ,yyscan_t yyscanner );
 
 YY_BUFFER_STATE yy_scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
 YY_BUFFER_STATE yy_scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE yy_scan_bytes (yyconst char *bytes,yy_size_t len ,yyscan_t yyscanner );
+YY_BUFFER_STATE yy_scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
 
 void *yyalloc (yy_size_t ,yyscan_t yyscanner );
 void *yyrealloc (void *,yy_size_t ,yyscan_t yyscanner );
@@ -1126,9 +1119,6 @@ static yyconst flex_int32_t yy_rule_can_match_eol[16] =
 #include "JsonNode.h"
 #include "parser.hpp"
 
-
-#define SAVE_TOKEN(n) (yylval->strval=new std::string(yytext+n,yyleng-1-n))
-
 //#define DEBUG
 #ifdef DEBUG
     #define TOKEN(t) do{ printf("tok " #t "\t: %s\n",yytext); return(t);}while(0)
@@ -1205,7 +1195,7 @@ char * escape_str(char * first, size_t len){
     return org_first;
 }
 
-#line 1209 "token.cpp"
+#line 1199 "token.cpp"
 
 #define INITIAL 0
 
@@ -1234,8 +1224,8 @@ struct yyguts_t
     size_t yy_buffer_stack_max; /**< capacity of stack. */
     YY_BUFFER_STATE * yy_buffer_stack; /**< Stack as an array. */
     char yy_hold_char;
-    yy_size_t yy_n_chars;
-    yy_size_t yyleng_r;
+    int yy_n_chars;
+    int yyleng_r;
     char *yy_c_buf_p;
     int yy_init;
     int yy_start;
@@ -1288,17 +1278,13 @@ FILE *yyget_out (yyscan_t yyscanner );
 
 void yyset_out  (FILE * out_str ,yyscan_t yyscanner );
 
-yy_size_t yyget_leng (yyscan_t yyscanner );
+int yyget_leng (yyscan_t yyscanner );
 
 char *yyget_text (yyscan_t yyscanner );
 
 int yyget_lineno (yyscan_t yyscanner );
 
 void yyset_lineno (int line_number ,yyscan_t yyscanner );
-
-int yyget_column  (yyscan_t yyscanner );
-
-void yyset_column (int column_no ,yyscan_t yyscanner );
 
 YYSTYPE * yyget_lval (yyscan_t yyscanner );
 
@@ -1360,7 +1346,7 @@ static int input (yyscan_t yyscanner );
 #ifndef YY_INPUT
 #define YY_INPUT(buf,result,max_size) \
 	errno=0; \
-	while ( (result = read( fileno(yyin), (char *) buf, (yy_size_t) max_size )) < 0 ) \
+	while ( (result = read( fileno(yyin), (char *) buf, max_size )) < 0 ) \
 	{ \
 		if( errno != EINTR) \
 		{ \
@@ -1431,6 +1417,11 @@ YY_DECL
 	register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
+#line 119 "token.l"
+
+
+#line 1424 "token.cpp"
+
     yylval = yylval_param;
 
 	if ( !yyg->yy_init )
@@ -1458,12 +1449,6 @@ YY_DECL
 
 		yy_load_buffer_state(yyscanner );
 		}
-
-	{
-#line 122 "token.l"
-
-
-#line 1467 "token.cpp"
 
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
@@ -1506,7 +1491,7 @@ yy_find_action:
 
 		if ( yy_act != YY_END_OF_BUFFER && yy_rule_can_match_eol[yy_act] )
 			{
-			yy_size_t yyl;
+			int yyl;
 			for ( yyl = 0; yyl < yyleng; ++yyl )
 				if ( yytext[yyl] == '\n' )
 					   
@@ -1528,19 +1513,18 @@ do_action:	/* This label is used only to access EOF actions. */
 			goto yy_find_action;
 
 case 1:
-#line 125 "token.l"
+#line 122 "token.l"
 case 2:
 YY_RULE_SETUP
-#line 125 "token.l"
+#line 122 "token.l"
 { 
-    yytext[1 + yyleng-2] = '\0';
-	yylval->strval = yytext + 1;
+	yylval->strval = new std::string( escape_str(yytext+1, yyleng-2) );
     TOKEN(T_STRING);
 };
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 131 "token.l"
+#line 127 "token.l"
 { 
 	yylval->numval = atof(yytext);
 	TOKEN(T_NUMBER); 
@@ -1548,66 +1532,66 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 136 "token.l"
+#line 132 "token.l"
 { TOKEN(T_TRUE); };
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 137 "token.l"
+#line 133 "token.l"
 { TOKEN(T_FALSE); };
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 138 "token.l"
+#line 134 "token.l"
 { TOKEN(T_NULL); };
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 140 "token.l"
+#line 136 "token.l"
 { TOKEN(T_LEFT_CUR); };
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 141 "token.l"
+#line 137 "token.l"
 { TOKEN(T_RIGHT_CUR); };
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 143 "token.l"
+#line 139 "token.l"
 { TOKEN(T_LEFT_BRAK); };
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 144 "token.l"
+#line 140 "token.l"
 { TOKEN(T_RIGHT_BRAK); };
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 146 "token.l"
+#line 142 "token.l"
 { TOKEN(T_COMMA); };
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 147 "token.l"
+#line 143 "token.l"
 { TOKEN(T_COLON); };
 	YY_BREAK
 case 13:
 /* rule 13 can match eol */
 YY_RULE_SETUP
-#line 149 "token.l"
+#line 145 "token.l"
 /* ignore whitespace */;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 151 "token.l"
+#line 147 "token.l"
 { TOKEN(T_UNIDENTIFY); }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 153 "token.l"
+#line 149 "token.l"
 ECHO;
 	YY_BREAK
-#line 1611 "token.cpp"
+#line 1595 "token.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1738,7 +1722,6 @@ case YY_STATE_EOF(INITIAL):
 			"fatal flex scanner internal error--no action found" );
 	} /* end of action switch */
 		} /* end of scanning one token */
-	} /* end of user's declarations */
 } /* end of yylex */
 
 /* yy_get_next_buffer - try to read in a new buffer
@@ -1802,14 +1785,14 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 			{ /* Not enough room in the buffer - grow it. */
 
 			/* just a shorter name for the current buffer */
-			YY_BUFFER_STATE b = YY_CURRENT_BUFFER_LVALUE;
+			YY_BUFFER_STATE b = YY_CURRENT_BUFFER;
 
 			int yy_c_buf_p_offset =
 				(int) (yyg->yy_c_buf_p - b->yy_ch_buf);
 
 			if ( b->yy_is_our_buffer )
 				{
-				yy_size_t new_size = b->yy_buf_size * 2;
+				int new_size = b->yy_buf_size * 2;
 
 				if ( new_size <= 0 )
 					b->yy_buf_size += b->yy_buf_size / 8;
@@ -1840,7 +1823,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 		/* Read in more data. */
 		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-			yyg->yy_n_chars, num_to_read );
+			yyg->yy_n_chars, (size_t) num_to_read );
 
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars;
 		}
@@ -1931,7 +1914,6 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 			}
 		}
 
-	(void)yyg;
 	return yy_is_jam ? 0 : yy_current_state;
 }
 
@@ -1948,7 +1930,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
 		{ /* need to shift things up to make room */
 		/* +2 for EOB chars. */
-		register yy_size_t number_to_move = yyg->yy_n_chars + 2;
+		register int number_to_move = yyg->yy_n_chars + 2;
 		register char *dest = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[
 					YY_CURRENT_BUFFER_LVALUE->yy_buf_size + 2];
 		register char *source =
@@ -2002,7 +1984,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 		else
 			{ /* need more input */
-			yy_size_t offset = yyg->yy_c_buf_p - yyg->yytext_ptr;
+			int offset = yyg->yy_c_buf_p - yyg->yytext_ptr;
 			++yyg->yy_c_buf_p;
 
 			switch ( yy_get_next_buffer( yyscanner ) )
@@ -2173,6 +2155,10 @@ static void yy_load_buffer_state  (yyscan_t yyscanner)
 	yyfree((void *) b ,yyscanner );
 }
 
+#ifndef __cplusplus
+extern int isatty (int );
+#endif /* __cplusplus */
+    
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
  * such as during a yyrestart() or at EOF.
@@ -2289,7 +2275,7 @@ void yypop_buffer_state (yyscan_t yyscanner)
  */
 static void yyensure_buffer_stack (yyscan_t yyscanner)
 {
-	yy_size_t num_to_alloc;
+	int num_to_alloc;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 	if (!yyg->yy_buffer_stack) {
@@ -2387,12 +2373,12 @@ YY_BUFFER_STATE yy_scan_string (yyconst char * yystr , yyscan_t yyscanner)
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE yy_scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_len , yyscan_t yyscanner)
+YY_BUFFER_STATE yy_scan_bytes  (yyconst char * yybytes, int  _yybytes_len , yyscan_t yyscanner)
 {
 	YY_BUFFER_STATE b;
 	char *buf;
 	yy_size_t n;
-	yy_size_t i;
+	int i;
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
 	n = _yybytes_len + 2;
@@ -2502,7 +2488,7 @@ FILE *yyget_out  (yyscan_t yyscanner)
 /** Get the length of the current token.
  * @param yyscanner The scanner object.
  */
-yy_size_t yyget_leng  (yyscan_t yyscanner)
+int yyget_leng  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
     return yyleng;
@@ -2538,7 +2524,7 @@ void yyset_lineno (int  line_number , yyscan_t yyscanner)
 
         /* lineno is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           YY_FATAL_ERROR( "yyset_lineno called with no buffer" );
+           yy_fatal_error( "yyset_lineno called with no buffer" , yyscanner); 
     
     yylineno = line_number;
 }
@@ -2553,7 +2539,7 @@ void yyset_column (int  column_no , yyscan_t yyscanner)
 
         /* column is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           YY_FATAL_ERROR( "yyset_column called with no buffer" );
+           yy_fatal_error( "yyset_column called with no buffer" , yyscanner); 
     
     yycolumn = column_no;
 }
@@ -2777,7 +2763,7 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 152 "token.l"
+#line 149 "token.l"
 
 
 

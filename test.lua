@@ -14,7 +14,9 @@ obj = JSON.loads [[
 {
     "__len": "asdf;zxcv test",
     "glossary": {
-        "title": "example glossary",
+        "title": "exa_mple gl_ossary",
+        "title23": "",
+        "ti2tle": "exa_mple gl_ossary0",
         "GlossDiv": {
             "title": "S",
             "GlossList": {
@@ -27,7 +29,16 @@ obj = JSON.loads [[
                     "name": null,
                     "Glos\"sDef": {
                         "para": "A meta-markup\tlan\nguage, used to",
-                        "GlossSeeAlso": ["GML", "XML"]
+                        "GlossSeeAlso": [
+                            "GML", "XML", ["asdfzxcv3"],
+                            "GML", "XML", "asdfzxcv3",
+                            "GML", "XML", "asdfzxcv3",
+                            "GML", "XML", "asdfzxcv3",
+                            "GML", "XML", "asdfzxcv3",
+                            "GML", "XML", "asdfzxcv3",
+                            "GML", "XML", "asdfzxcv3",
+                            "GML", "XML", "asdfzxcv3"
+                        ]
                     },
                     "Glo\nssSee": "markup"
                 }
@@ -36,11 +47,9 @@ obj = JSON.loads [[
     }
 }
 ]]
--- print(obj)
--- print(JSON.keys(obj))
--- print(JSON.keys(obj.glossary.GlossDiv.GlossList.GlossEntry))
-print("size", #obj)
 print(obj)
-for k,v in pairs(obj) do
-    print(k, v)
-end
+--print(JSON.keys(obj))
+-- print(obj.glossary) --.GlossDiv.GlossList.GlossEntry))
+-- print("size", #obj)
+-- print(obj)
+-- for k,v in pairs(obj) do print(k, v) end

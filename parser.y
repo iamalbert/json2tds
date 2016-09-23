@@ -1,6 +1,5 @@
 
 %{
-    #include <iostream>
     #include <cstdio>
     #include <string>
     #include <memory>
@@ -31,7 +30,7 @@
 %union {
     JsonValue * value;
 
-    char * strval;
+    std::string * strval;
     double numval;
     int token;
 }
@@ -59,27 +58,56 @@
 
 start: element {
 	state->value = $1;
-	state->value->root = state;
+	state->value->isRoot = true;
 }
 
 array: T_LEFT_BRAK elements T_RIGHT_BRAK { 
         $$ = state->newObject<JsonArray>();
         $$->member = $2;
-        $$->reverse_member();
+        //$$->reverse_member();
 		((JsonArray*)$$)->list2vector();
+        printf("arr(%c)\n", $2->type);
     }| T_LEFT_BRAK T_RIGHT_BRAK { 
         $$ = state->newObject<JsonArray>();
     }
 ;
 elements: element {
-		$$ = $1;
+        $1->tail = $1;
+        $$ = $1;
+        printf("ele %c\n", $1->type );
+
     }| elements T_COMMA element {
-		$3->next = $1; /* the list is concat reversed */
-		$$ = $3;
+		$1->tail->next = $3; /* the list is concat reversed */
+        $1->tail = $3;
+		$$ = $1;
+        printf("eles(%c) ele(%c)\n", $1->type, $3->type);
     }
+;
+object: T_LEFT_CUR members T_RIGHT_CUR { 
+		$$ = state->newObject<JsonObject>();
+        $$->member = $2;
+        //$$->reverse_member();
+		((JsonObject*)$$)->list2map();
+    }| T_LEFT_CUR T_RIGHT_CUR {
+	    $$ = state->newObject<JsonObject>();
+    }
+;
+members: member {
+        $$ = $1;
+    }|   members T_COMMA member {
+        $3->next = $1;
+        $$ = $3;
+    }
+;
+member: T_STRING T_COLON element {
+    $$ = state->newObject<JsonPair>(state ,$1);
+	$$->member =  $3;
+    delete (std::string*) $1;
+}
 ;
 element: T_STRING {
         $$ = state->newObject<JsonString>(state, $1);
+        delete (std::string*) $1;
     }| T_NUMBER {
         $$ = state->newObject<JsonNumber>($1);
     }| T_TRUE {
@@ -93,29 +121,6 @@ element: T_STRING {
     }| object {
         $$ = $1;
     }
-;
-object: T_LEFT_CUR T_RIGHT_CUR {
-		$$ = state->newObject<JsonObject>();
-      }
-      | T_LEFT_CUR members T_RIGHT_CUR { 
-		$$ = state->newObject<JsonObject>();
-        $$->member = $2;
-        $$->reverse_member();
-		((JsonObject*)$$)->list2map();
-      }
-;
-members: member {
-            $$ = $1;
-       } |
-       members T_COMMA member {
-            $3->next = $1;
-            $$ = $3;
-       }
-;
-member: T_STRING T_COLON element {
-    $$ = state->newObject<JsonPair>(state ,$1);
-	$$->member =  $3;
-}
 ;
 
 %%
@@ -139,12 +144,13 @@ JsonState* parse_json( FILE * fp ){
 		yyparse(scanner, state);
 		//state.getJsonValue()->print(std::cerr);
 	}catch( std::exception & e ){
-		std::cerr << e.what();
-		state->free();
+        fputs( e.what(), stderr );
+        delete state;
+        state = NULL;
 	}
     yylex_destroy(scanner);
 
-    return std::move(state);
+    return state;
 }
 JsonState* parse_json_string( const char * string ){
     JsonState* state = new JsonState();
@@ -156,8 +162,8 @@ JsonState* parse_json_string( const char * string ){
 		yyparse(scanner, state);
 		yy_delete_buffer(buffer, scanner);
 	}catch( std::exception & e ){
-		std::cerr << e.what();
-		state->free();
+        fputs( e.what(), stderr );
+        delete state; state = NULL;
 	}
     yylex_destroy(scanner);
 
