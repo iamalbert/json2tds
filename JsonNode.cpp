@@ -3,7 +3,6 @@
 
 JsonValue::JsonValue() : JsonValue('?') {}
 JsonValue::JsonValue(char c) : type(c), 
-    member(nullptr), 
     root(nullptr) 
 {
 	//printf("value %c\n", c);

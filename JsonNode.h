@@ -35,7 +35,6 @@ union JsonBaseType {
 
 struct JsonValue {
     char type;
-    JsonValue *member;
     JsonState *root;
 
 	bool isRoot = false;
