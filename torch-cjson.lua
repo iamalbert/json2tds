@@ -43,7 +43,7 @@ local c = {
 
 -- Apply:
 local apply
-if torch and false and torch.isatty(io.stdout) then
+if torch and torch.isatty(io.stdout) then
     apply = function(color, txt) return c[color] .. txt .. c.none end
 else
    apply = function(color, txt) return txt end

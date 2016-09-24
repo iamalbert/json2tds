@@ -10,6 +10,42 @@ JsonValue::JsonValue(char c) : type(c),
 bool JsonValue::isRoot() const {
     return root->value == this;
 }
+int JsonValue::toLuaObject(LS) {
+    switch(type){
+        case 'n':
+            lua_pushnumber(L, as<JsonNumber>()->value);
+            return 1;
+        case 'b':
+            lua_pushboolean(L, as<JsonBoolean>()->value);
+            return 1;
+        case 's': 
+            lua_pushstring(L, as<JsonString>()->value);
+            return 1;
+        case 'o': 
+            lua_newtable(L);
+            for ( auto & kv : as<JsonObject>()->ptrTable ){
+                kv.second->toLuaObject(L);
+                lua_setfield(L, -2, kv.first );
+            }
+            return 1;
+        case 'a':{
+            lua_newtable(L);
+            int idx = 1;
+            for ( auto & v : as<JsonArray>()->ptrVec ){
+                v->toLuaObject(L);
+                lua_rawseti(L, -2, idx);
+                idx++;
+            }
+            return 1;
+        }
+        case 'x':
+            lua_pushnil(L);
+            return 1;
+        default:
+            luaL_error(L, "unknown type of JsonValue: %c", type);
+            return 0;
+    }
+}
 const char * JsonValue::typeString() const {
     switch(type){
         case 'n': return "JsonNumber";
@@ -20,9 +56,6 @@ const char * JsonValue::typeString() const {
         default:
                   return "JsonUnknownType";
     }
-}
-int JsonValue::toLuaObject(LS) {
-    throw std::runtime_error("toLuaObject this node should be overriden");
 }
 
 int JsonValue::asLuaObject(LS) {
@@ -37,63 +70,29 @@ int JsonValue::asLuaObject(LS) {
 ///////////
 
 JsonObject::JsonObject() : JsonValue('o') {}
-int JsonObject::toLuaObject(LS) {
-    lua_newtable(L);
-    for ( auto & kv : ptrTable ){
-        kv.second->toLuaObject(L);
-        lua_setfield(L, -2, kv.first );
-    }
-    return 1;
-}
 
 /////////
 
 JsonArray::JsonArray() : JsonValue('a') {}
 
-int JsonArray::toLuaObject(LS) {
-    lua_newtable(L);
-    int idx = 1;
-    for ( auto & v : ptrVec ){
-        v->toLuaObject(L);
-        lua_rawseti(L, -2, idx);
-        idx++;
-    }
-    return 1;
-}
 
 /////
 
 JsonString::JsonString(const char * s) : JsonValue('s'), value(s) {
 }
 
-int JsonString::toLuaObject(LS) {
-    lua_pushstring(L, value );
-    return 1;
-}
 
 //////
 
 JsonNumber::JsonNumber(double v) : JsonValue('n'), value(v) {}
-int JsonNumber::toLuaObject(LS) {
-    lua_pushnumber(L, value);
-    return 1;
-}
 
 ///
 
 JsonBoolean::JsonBoolean(bool b) : JsonValue('b'), value(b) {}
-int JsonBoolean::toLuaObject(LS) {
-    lua_pushboolean(L, value);
-    return 1;
-}
 
 //////// JsonNull
 
 JsonNull::JsonNull() : JsonValue('x') {}
-int JsonNull::toLuaObject(LS) {
-    lua_pushnil(L);
-    return 1;
-}
 
 JsonState::JsonState() : value(nullptr) {
 }

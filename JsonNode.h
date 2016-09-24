@@ -43,7 +43,7 @@ struct JsonValue {
 
     virtual ~JsonValue() = default;
 
-    virtual int toLuaObject(LS);
+    int toLuaObject(LS);
 
     int asLuaObject(LS);
     int luaGet(LS);
@@ -68,7 +68,6 @@ struct JsonObject : public JsonValue {
 
     JsonObject();
     virtual ~JsonObject() = default;
-    virtual int toLuaObject(LS);
 };
 
 struct JsonArray : public JsonValue {
@@ -77,7 +76,6 @@ struct JsonArray : public JsonValue {
 
     JsonArray();
     virtual ~JsonArray() = default;
-    virtual int toLuaObject(LS);
 
 };
 
@@ -85,24 +83,20 @@ struct JsonString : public JsonValue {
     const char* value;
     JsonString(const char *);
     virtual ~JsonString() = default;
-    virtual int toLuaObject(LS);
 };
 struct JsonNumber : public JsonValue {
     double value;
     JsonNumber(double v);
     virtual ~JsonNumber() = default;
-    virtual int toLuaObject(LS);
 };
 struct JsonBoolean : public JsonValue {
     bool value;
     JsonBoolean(bool b);
     virtual ~JsonBoolean() = default;
-    virtual int toLuaObject(LS);
 };
 struct JsonNull : public JsonValue {
     JsonNull();
     virtual ~JsonNull() = default ;
-    virtual int toLuaObject(LS);
 };
 
 struct JsonState {
