@@ -27,8 +27,6 @@ obj = JSON.loads [[
     "__len": "asdf;zxcv test",
     "glossary": {
         "title": "exa_mple gl_ossary",
-        "title23": "",
-        "ti2tle": "exa_mple gl_ossary0",
         "GlossDiv": {
             "title": "S",
             "GlossList": {
@@ -52,10 +50,12 @@ obj = JSON.loads [[
                             "GML", "XML", "asdfzxcv3"
                         ]
                     },
-                    "Glo\nssSee": "markup"
+                    "Glo\nssSee": "markup\u4e2d\u6587"
                 }
             }
-        }
+        },
+        "title23": "",
+        "ti2tle": "exa_mple gl_o我是誰ssary0"
     }
 }
 ]]
@@ -69,3 +69,11 @@ print(obj)
 --io.read()
 obj = nil; collectgarbage();
 --io.read()
+
+obj = JSON.loads[[
+{"a":1}
+{"a":2, "obj": {} }
+{"a":3, "list":[] }
+]]
+print(obj)
+

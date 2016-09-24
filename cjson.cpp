@@ -123,13 +123,15 @@ METHOD_DECLARE(keys){
         luaL_error(L, "expecting JsonObject, %s given", self->typeString() );
     }
 
+    auto & table = self->as<JsonObject>()->ptrTable ;
+    int i = table.size();
+
     lua_newtable(L);
-    int i = 1;
-    for ( auto & kv : self->as<JsonObject>()->ptrTable ){
+    for ( auto & kv : table){
         lua_pushinteger(L, i);
         lua_pushstring(L, kv.first );
         lua_settable(L, -3);
-        i+=1;
+        i -= 1;
     }
 
     return 1;

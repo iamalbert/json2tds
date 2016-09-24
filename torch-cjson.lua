@@ -84,6 +84,10 @@ end
 
 
 local tostringArray = function(jsonArray, indent)
+	if #jsonArray == 0 then
+		return "[]"
+	end
+
     indent = indent or ""
     local str = { "[" }
 
@@ -96,6 +100,10 @@ local tostringArray = function(jsonArray, indent)
     return table.concat(str, "\n")
 end
 local tostringObject = function(value, indent)
+	if #value == 0 then
+		return "{}"
+	end
+
     indent = indent or ""
     local str = { "{" }
 

@@ -44,8 +44,7 @@
 %token T_END_OF_FILE
 %token T_UNIDENTIFY
     
-
-%type <value>  array object
+%type <value>  array object objects
 %type <strval> string
 %type <value>  members elements element 
 
@@ -62,6 +61,8 @@ array: T_LEFT_BRAK elements T_RIGHT_BRAK {
         $$ = $2;
     }| T_LEFT_BRAK T_RIGHT_BRAK { 
         $$ = state->newObject<JsonArray>();
+    }| objects {
+        $$ = $1;
     }
 ;
 elements: element {
@@ -75,6 +76,19 @@ elements: element {
         $$ = $1;
     }
 ;
+objects: object object {
+        //printf("ele %c\n", $1->type );
+        $$ = state->newObject<JsonArray>();
+        $$->as<JsonArray>()->ptrVec.push_back($1);
+        $$->as<JsonArray>()->ptrVec.push_back($2);
+
+    }| objects object {
+        //printf("eles(%c) ele(%c)\n", $1->type, $3->type);
+        $1->as<JsonArray>()->ptrVec.push_back($2);
+        $$ = $1;
+    }
+;
+
 object: T_LEFT_CUR members T_RIGHT_CUR { 
         //puts("obj");
         $$ = $2;

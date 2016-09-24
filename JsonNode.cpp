@@ -21,6 +21,9 @@ int JsonValue::toLuaObject(LS) {
         case 's': 
             lua_pushstring(L, as<JsonString>()->value);
             return 1;
+        case 'x':
+            lua_pushnil(L);
+            return 1;
         case 'o': 
             lua_newtable(L);
             for ( auto & kv : as<JsonObject>()->ptrTable ){
@@ -38,9 +41,6 @@ int JsonValue::toLuaObject(LS) {
             }
             return 1;
         }
-        case 'x':
-            lua_pushnil(L);
-            return 1;
         default:
             luaL_error(L, "unknown type of JsonValue: %c", type);
             return 0;
