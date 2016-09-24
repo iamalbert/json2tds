@@ -64,10 +64,10 @@ struct JsonString;
 
 struct JsonObject : public JsonValue {
 
-    JsonObject();
-
     std::unordered_map<const char* , JsonValue*> ptrTable;
 
+    JsonObject();
+    virtual ~JsonObject() = default;
     virtual int toLuaObject(LS);
 };
 
@@ -76,7 +76,7 @@ struct JsonArray : public JsonValue {
     std::vector<JsonValue*> ptrVec;
 
     JsonArray();
-
+    virtual ~JsonArray() = default;
     virtual int toLuaObject(LS);
 
 };
@@ -84,23 +84,24 @@ struct JsonArray : public JsonValue {
 struct JsonString : public JsonValue {
     const char* value;
     JsonString(const char *);
-
+    virtual ~JsonString() = default;
     virtual int toLuaObject(LS);
 };
 struct JsonNumber : public JsonValue {
     double value;
     JsonNumber(double v);
+    virtual ~JsonNumber() = default;
     virtual int toLuaObject(LS);
 };
 struct JsonBoolean : public JsonValue {
     bool value;
     JsonBoolean(bool b);
+    virtual ~JsonBoolean() = default;
     virtual int toLuaObject(LS);
 };
 struct JsonNull : public JsonValue {
-
     JsonNull();
-
+    virtual ~JsonNull() = default ;
     virtual int toLuaObject(LS);
 };
 
@@ -120,10 +121,13 @@ struct JsonState {
         static_assert(std::is_base_of<JsonValue, T>::value,
                       "must derived from JsonValue");
 
-        auto p = std::make_unique<T>( std::forward<Args>(args)... ) ;
-		p->root = this;
+        //auto p = std::make_unique<T>( std::forward<Args>(args)... ) ;
+		//p->root = this;
         //auto p = std::unique_ptr<T>( ) ;
-        objList.push_back( std::move(p) );
+        //objList.push_back( std::move(p) );
+
+        objList.emplace_back( new T(std::forward<Args>(args)...) );
+        objList.back()->root = this;
 
         return static_cast<T*>(objList.back().get());
     }

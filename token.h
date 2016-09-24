@@ -348,7 +348,7 @@ extern int yylex \
 #undef YY_DECL
 #endif
 
-#line 154 "token.l"
+#line 163 "token.l"
 
 
 #line 355 "token.h"

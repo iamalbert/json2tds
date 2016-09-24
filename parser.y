@@ -8,18 +8,18 @@
     #include "parser.hpp"
     #include "token.h"
 
-    extern int yylex(YYSTYPE * yylval, yyscan_t  scanner );
+    extern int yylex(YYSTYPE * yylval, yyscan_t  scanner, JsonState * state );
     extern void yyerror(yyscan_t scanner, JsonState*, const char *);
 
 %}
 
 %define parse.error verbose
 %pure-parser
-%lex-param {void * scanner}
-%parse-param {void * scanner} {JsonState * state}
-
+%lex-param {void * scanner} 
+%parse-param {void * scanner} 
+%param {JsonState * state}
 /*
-%define api.pure full 
+
 %lex-param {void *scanner}
 %parse-param {void *scanner}
 */
@@ -86,19 +86,18 @@ object: T_LEFT_CUR members T_RIGHT_CUR {
 members: string T_COLON element  {
         $$ = state->newObject<JsonObject>();
 
-        $$->as<JsonObject>()->ptrTable[ state->getString($1) ] = $3 ;
+        $$->as<JsonObject>()->ptrTable[($1)] = $3 ;
 
         //delete (std::string*) $1;
         //printf("mem(%s:%c)\n", $1->as<JsonPair>()->key->c_str(), $1->member->type);
     }|   members T_COMMA string T_COLON element {
-        $1->as<JsonObject>()->ptrTable[ state->getString($3) ] = $5;
+        $1->as<JsonObject>()->ptrTable[($3)] = $5;
         //delete (std::string*) $1;
         $$ = $1;
     }
 ;
 string : T_STRING {
-    $$ = state->getString($1);
-    free((void*)$1);
+    $$ = $1 ; //state->getString($1);
 }
 element: string {
         $$ = state->newObject<JsonString>($1);
@@ -164,21 +163,3 @@ JsonState* parse_json_string( const char * string ){
     return std::move(state);
 }
 
-
-
-/*
-int main(int argc, char **argv){
-	for( int i = 1; i < argc; i ++ ){
-		FILE * fp = fopen( argv[i], "rb" );
-		JsonValue * json = parse_json(fp);
-		fclose(fp);
-
-		if( json ){
-			//json->print(std::cout); std::cout << "\n";
-		}else{
-		}
-		delete json;
-	}
-}
-
-*/

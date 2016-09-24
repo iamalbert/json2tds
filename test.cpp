@@ -14,11 +14,10 @@ int main(int argc, char** argv){
 
     if( state->value == NULL ){
 		puts("parse error");
+        delete state;
         return -2;
     }
     puts("done");
-
-
     delete state;
 
     puts("close");

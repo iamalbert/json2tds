@@ -12,6 +12,9 @@
 #else
     #define TOKEN(t) return (t);
 #endif
+
+#define YY_DECL int yylex \
+        (YYSTYPE * yylval_param, yyscan_t yyscanner, JsonState * state)
 //(yylval.token = t)
 
 char * codepoint_to_char(unsigned long c, char *b ){
@@ -30,7 +33,7 @@ unsigned long int hex2int(char * b ){
     return strtoul( b, NULL, 16 );
 }
 
-size_t escape_str(char * first, size_t len){
+char * escape_str(char * first, size_t len){
     char * last = first + len;
     char * org_first = first;
     char * pos = first;
@@ -79,7 +82,7 @@ size_t escape_str(char * first, size_t len){
         }
     }
     *pos = '\0';
-    return pos - org_first;
+    return org_first;
 }
 
 %}
@@ -87,6 +90,7 @@ size_t escape_str(char * first, size_t len){
 %option yylineno
 %option reentrant
 %option bison-bridge
+
 
 DIGIT1to9   [1-9]
 DIGIT       [0-9]
@@ -120,12 +124,17 @@ CHARS           {CHAR}+
 
 {DBL_QUOTE}{DBL_QUOTE} |
 {DBL_QUOTE}{CHARS}{DBL_QUOTE} { 
+    /*
     size_t len = escape_str(yytext+1, yyleng-2);
 
     char * newbuf = (char*) malloc(len+1);
     strcpy( newbuf , yytext+1);
+
+    puts(newbuf);
+    printf("%p\n", state->getString(newbuf) );
+    */
     
-	yylval->strval = newbuf;
+	yylval->strval = state->getString(escape_str(yytext+1, yyleng-2));
 
     TOKEN(T_STRING);
 };

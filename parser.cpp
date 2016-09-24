@@ -72,7 +72,7 @@
     #include "parser.hpp"
     #include "token.h"
 
-    extern int yylex(YYSTYPE * yylval, yyscan_t  scanner );
+    extern int yylex(YYSTYPE * yylval, yyscan_t  scanner, JsonState * state );
     extern void yyerror(yyscan_t scanner, JsonState*, const char *);
 
 
@@ -456,7 +456,7 @@ static const yytype_uint8 yytranslate[] =
 static const yytype_uint8 yyrline[] =
 {
        0,    56,    56,    61,    64,    68,    73,    79,    82,    86,
-      93,    99,   103,   105,   107,   109,   111,   113,   115
+      93,    99,   102,   104,   106,   108,   110,   112,   114
 };
 #endif
 
@@ -1169,7 +1169,7 @@ yybackup:
   if (yychar == YYEMPTY)
     {
       YYDPRINTF ((stderr, "Reading a token: "));
-      yychar = yylex (&yylval, scanner);
+      yychar = yylex (&yylval, scanner, state);
     }
 
   if (yychar <= YYEOF)
@@ -1316,7 +1316,7 @@ yyreduce:
     {
         (yyval.value) = state->newObject<JsonObject>();
 
-        (yyval.value)->as<JsonObject>()->ptrTable[ state->getString((yyvsp[-2].strval)) ] = (yyvsp[0].value) ;
+        (yyval.value)->as<JsonObject>()->ptrTable[((yyvsp[-2].strval))] = (yyvsp[0].value) ;
 
         //delete (std::string*) $1;
         //printf("mem(%s:%c)\n", $1->as<JsonPair>()->key->c_str(), $1->member->type);
@@ -1327,7 +1327,7 @@ yyreduce:
   case 10:
 #line 93 "parser.y" /* yacc.c:1646  */
     {
-        (yyvsp[-4].value)->as<JsonObject>()->ptrTable[ state->getString((yyvsp[-2].strval)) ] = (yyvsp[0].value);
+        (yyvsp[-4].value)->as<JsonObject>()->ptrTable[((yyvsp[-2].strval))] = (yyvsp[0].value);
         //delete (std::string*) $1;
         (yyval.value) = (yyvsp[-4].value);
     }
@@ -1337,70 +1337,69 @@ yyreduce:
   case 11:
 #line 99 "parser.y" /* yacc.c:1646  */
     {
-    (yyval.strval) = state->getString((yyvsp[0].strval));
-    free((void*)(yyvsp[0].strval));
+    (yyval.strval) = (yyvsp[0].strval) ; //state->getString($1);
 }
-#line 1344 "parser.cpp" /* yacc.c:1646  */
+#line 1343 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 103 "parser.y" /* yacc.c:1646  */
+#line 102 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = state->newObject<JsonString>((yyvsp[0].strval));
     }
-#line 1352 "parser.cpp" /* yacc.c:1646  */
+#line 1351 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 105 "parser.y" /* yacc.c:1646  */
+#line 104 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = state->newObject<JsonNumber>((yyvsp[0].numval));
     }
-#line 1360 "parser.cpp" /* yacc.c:1646  */
+#line 1359 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 107 "parser.y" /* yacc.c:1646  */
+#line 106 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = state->newObject<JsonBoolean>(true);
     }
-#line 1368 "parser.cpp" /* yacc.c:1646  */
+#line 1367 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 109 "parser.y" /* yacc.c:1646  */
+#line 108 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = state->newObject<JsonBoolean>(false);
     }
-#line 1376 "parser.cpp" /* yacc.c:1646  */
+#line 1375 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 111 "parser.y" /* yacc.c:1646  */
+#line 110 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = state->newObject<JsonNull>();
     }
-#line 1384 "parser.cpp" /* yacc.c:1646  */
+#line 1383 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 113 "parser.y" /* yacc.c:1646  */
+#line 112 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = (yyvsp[0].value);
     }
-#line 1392 "parser.cpp" /* yacc.c:1646  */
+#line 1391 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 115 "parser.y" /* yacc.c:1646  */
+#line 114 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = (yyvsp[0].value);
     }
-#line 1400 "parser.cpp" /* yacc.c:1646  */
+#line 1399 "parser.cpp" /* yacc.c:1646  */
     break;
 
 
-#line 1404 "parser.cpp" /* yacc.c:1646  */
+#line 1403 "parser.cpp" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1628,7 +1627,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 120 "parser.y" /* yacc.c:1906  */
+#line 119 "parser.y" /* yacc.c:1906  */
 
 
 //extern int yylex(YYSTYPE*);
@@ -1676,21 +1675,3 @@ JsonState* parse_json_string( const char * string ){
     return std::move(state);
 }
 
-
-
-/*
-int main(int argc, char **argv){
-	for( int i = 1; i < argc; i ++ ){
-		FILE * fp = fopen( argv[i], "rb" );
-		JsonValue * json = parse_json(fp);
-		fclose(fp);
-
-		if( json ){
-			//json->print(std::cout); std::cout << "\n";
-		}else{
-		}
-		delete json;
-	}
-}
-
-*/
