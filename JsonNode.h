@@ -37,7 +37,6 @@ struct JsonValue {
     char type;
     JsonState *root;
 
-	bool isRoot = false;
 
     JsonValue();
     JsonValue(char);
@@ -51,6 +50,7 @@ struct JsonValue {
     int luaLen(LS);
 
     bool isBaseType() const;
+    bool isRoot() const;
 
     const char * typeString() const;
 
@@ -108,7 +108,7 @@ struct JsonNull : public JsonValue {
 struct JsonState {
 	JsonValue *value;
 
-    std::deque< std::unique_ptr<JsonValue> > objList;
+    std::vector< JsonValue* > objList;
     std::unordered_set< std::string > strPool;
 
     JsonState();
@@ -125,11 +125,12 @@ struct JsonState {
 		//p->root = this;
         //auto p = std::unique_ptr<T>( ) ;
         //objList.push_back( std::move(p) );
+        T* obj = new T(args...);
+        obj->root = this;
 
-        objList.emplace_back( new T(std::forward<Args>(args)...) );
-        objList.back()->root = this;
+        objList.push_back(obj);
 
-        return static_cast<T*>(objList.back().get());
+        return obj;
     }
 
     //JsonValue *getJsonValue() const;
@@ -137,8 +138,8 @@ struct JsonState {
     void free();
 };
 
-JsonState* parse_json(FILE *);
-JsonState* parse_json_string(const char *);
+bool parse_json(FILE *, JsonState*);
+bool parse_json_string(const char *, JsonState*);
 
 #endif
 

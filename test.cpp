@@ -10,14 +10,17 @@ int main(int argc, char** argv){
     }
     puts("fopened");
 
-    JsonState *state = parse_json(fp);
+    JsonState *state = new JsonState();
+    bool ok = parse_json(fp, state);
 
-    if( state->value == NULL ){
+    if( not ok ){
 		puts("parse error");
         delete state;
         return -2;
     }
     puts("done");
+
+    state->free();
     delete state;
 
     puts("close");

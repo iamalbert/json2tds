@@ -18,10 +18,10 @@ install: libcjson.so
 libcjson.so: cjson.cpp parser.o token.o JsonNode.o
 	$(CXX) $(CXXFLAGS) -O2 -fPIC -shared -o $@ $^ -ll
 
-testcpp: test.cpp libcjson.so parser.o token.o JsonNode.o
+testcpp: test.cpp parser.o token.o JsonNode.o
 	$(CXX) $(CXXFLAGS) -g -o $@ $^ -ll -L$(LUA_LIBDIR) -lluajit
 
-%.o: %.cpp token.h parser.hpp
+%.o: %.cpp token.h parser.hpp JsonNode.h
 	$(CXX) -fPIC -shared -c $(CXXFLAGS) -o $@ $<
 
 token.h: token.cpp

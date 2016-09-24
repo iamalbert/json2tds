@@ -455,8 +455,8 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    56,    56,    61,    64,    68,    73,    79,    82,    86,
-      93,    99,   102,   104,   106,   108,   110,   112,   114
+       0,    56,    56,    60,    63,    67,    72,    78,    81,    85,
+      92,    98,   101,   103,   105,   107,   109,   111,   113
 };
 #endif
 
@@ -1251,68 +1251,67 @@ yyreduce:
 #line 56 "parser.y" /* yacc.c:1646  */
     {
 	state->value = (yyvsp[0].value);
-	state->value->isRoot = true;
 }
-#line 1257 "parser.cpp" /* yacc.c:1646  */
+#line 1256 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 61 "parser.y" /* yacc.c:1646  */
+#line 60 "parser.y" /* yacc.c:1646  */
     { 
         //printf("arr\n");
         (yyval.value) = (yyvsp[-1].value);
     }
-#line 1266 "parser.cpp" /* yacc.c:1646  */
+#line 1265 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 64 "parser.y" /* yacc.c:1646  */
+#line 63 "parser.y" /* yacc.c:1646  */
     { 
         (yyval.value) = state->newObject<JsonArray>();
     }
-#line 1274 "parser.cpp" /* yacc.c:1646  */
+#line 1273 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 68 "parser.y" /* yacc.c:1646  */
+#line 67 "parser.y" /* yacc.c:1646  */
     {
         //printf("ele %c\n", $1->type );
         (yyval.value) = state->newObject<JsonArray>();
         (yyval.value)->as<JsonArray>()->ptrVec.push_back((yyvsp[0].value));
 
     }
-#line 1285 "parser.cpp" /* yacc.c:1646  */
+#line 1284 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 73 "parser.y" /* yacc.c:1646  */
+#line 72 "parser.y" /* yacc.c:1646  */
     {
         //printf("eles(%c) ele(%c)\n", $1->type, $3->type);
         (yyvsp[-2].value)->as<JsonArray>()->ptrVec.push_back((yyvsp[0].value));
         (yyval.value) = (yyvsp[-2].value);
     }
-#line 1295 "parser.cpp" /* yacc.c:1646  */
+#line 1294 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 79 "parser.y" /* yacc.c:1646  */
+#line 78 "parser.y" /* yacc.c:1646  */
     { 
         //puts("obj");
         (yyval.value) = (yyvsp[-1].value);
     }
-#line 1304 "parser.cpp" /* yacc.c:1646  */
+#line 1303 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 82 "parser.y" /* yacc.c:1646  */
+#line 81 "parser.y" /* yacc.c:1646  */
     {
 	    (yyval.value) = state->newObject<JsonObject>();
     }
-#line 1312 "parser.cpp" /* yacc.c:1646  */
+#line 1311 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 86 "parser.y" /* yacc.c:1646  */
+#line 85 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = state->newObject<JsonObject>();
 
@@ -1321,85 +1320,85 @@ yyreduce:
         //delete (std::string*) $1;
         //printf("mem(%s:%c)\n", $1->as<JsonPair>()->key->c_str(), $1->member->type);
     }
-#line 1325 "parser.cpp" /* yacc.c:1646  */
+#line 1324 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 93 "parser.y" /* yacc.c:1646  */
+#line 92 "parser.y" /* yacc.c:1646  */
     {
         (yyvsp[-4].value)->as<JsonObject>()->ptrTable[((yyvsp[-2].strval))] = (yyvsp[0].value);
         //delete (std::string*) $1;
         (yyval.value) = (yyvsp[-4].value);
     }
-#line 1335 "parser.cpp" /* yacc.c:1646  */
+#line 1334 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 99 "parser.y" /* yacc.c:1646  */
+#line 98 "parser.y" /* yacc.c:1646  */
     {
     (yyval.strval) = (yyvsp[0].strval) ; //state->getString($1);
 }
-#line 1343 "parser.cpp" /* yacc.c:1646  */
+#line 1342 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 102 "parser.y" /* yacc.c:1646  */
+#line 101 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = state->newObject<JsonString>((yyvsp[0].strval));
     }
-#line 1351 "parser.cpp" /* yacc.c:1646  */
+#line 1350 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 104 "parser.y" /* yacc.c:1646  */
+#line 103 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = state->newObject<JsonNumber>((yyvsp[0].numval));
     }
-#line 1359 "parser.cpp" /* yacc.c:1646  */
+#line 1358 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 106 "parser.y" /* yacc.c:1646  */
+#line 105 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = state->newObject<JsonBoolean>(true);
     }
-#line 1367 "parser.cpp" /* yacc.c:1646  */
+#line 1366 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 108 "parser.y" /* yacc.c:1646  */
+#line 107 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = state->newObject<JsonBoolean>(false);
     }
-#line 1375 "parser.cpp" /* yacc.c:1646  */
+#line 1374 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 110 "parser.y" /* yacc.c:1646  */
+#line 109 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = state->newObject<JsonNull>();
     }
-#line 1383 "parser.cpp" /* yacc.c:1646  */
+#line 1382 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 112 "parser.y" /* yacc.c:1646  */
+#line 111 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = (yyvsp[0].value);
     }
-#line 1391 "parser.cpp" /* yacc.c:1646  */
+#line 1390 "parser.cpp" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 114 "parser.y" /* yacc.c:1646  */
+#line 113 "parser.y" /* yacc.c:1646  */
     {
         (yyval.value) = (yyvsp[0].value);
     }
-#line 1399 "parser.cpp" /* yacc.c:1646  */
+#line 1398 "parser.cpp" /* yacc.c:1646  */
     break;
 
 
-#line 1403 "parser.cpp" /* yacc.c:1646  */
+#line 1402 "parser.cpp" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1627,7 +1626,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 119 "parser.y" /* yacc.c:1906  */
+#line 118 "parser.y" /* yacc.c:1906  */
 
 
 //extern int yylex(YYSTYPE*);
@@ -1639,8 +1638,7 @@ void yyerror(yyscan_t scanner, JsonState *state, const char * err ) {
 	throw std::runtime_error(msg);
 }
 
-JsonState* parse_json( FILE * fp ){
-    JsonState* state = new JsonState();
+bool parse_json( FILE * fp, JsonState * state ){
     yyscan_t scanner;
 
     yylex_init(&scanner);
@@ -1650,15 +1648,13 @@ JsonState* parse_json( FILE * fp ){
 		//state.getJsonValue()->print(std::cerr);
 	}catch( std::exception & e ){
         fputs( e.what(), stderr );
-        delete state;
-        state = NULL;
+        return false;
 	}
     yylex_destroy(scanner);
 
-    return state;
+    return true;
 }
-JsonState* parse_json_string( const char * string ){
-    JsonState* state = new JsonState();
+bool parse_json_string( const char * string, JsonState *state ){
     yyscan_t scanner;
     yylex_init(&scanner);
 	try{
@@ -1668,10 +1664,10 @@ JsonState* parse_json_string( const char * string ){
 		yy_delete_buffer(buffer, scanner);
 	}catch( std::exception & e ){
         fputs( e.what(), stderr );
-        delete state; state = NULL;
+        return false;
 	}
     yylex_destroy(scanner);
 
-    return std::move(state);
+    return true;
 }
 

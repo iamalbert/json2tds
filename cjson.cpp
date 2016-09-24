@@ -23,9 +23,11 @@ METHOD_DECLARE(__len){
 
 METHOD_DECLARE(loads){
     const char *string = luaL_checkstring(L, 1);
-    JsonState *state = parse_json_string(string);
+    JsonState *state = new JsonState();
+    
+    bool ok = parse_json_string(string, state);
 
-    if( state->value == NULL ){
+    if(not ok){
         luaL_error(L, "parse error, not a valid JSON");
         return 0;
     }
@@ -34,7 +36,7 @@ METHOD_DECLARE(loads){
     luaL_getmetatable(L, PACKAGE_NAME_STR);
     lua_setmetatable(L, -2);
 
-    printf("size : %lu\n", state->objList.size() );
+    //printf("size : %lu\n", state->objList.size() );
     *self = state->value;
 
 	// for( auto & v : state->strPool ){ std::cout << "p:" << v << "\n"; }
@@ -49,46 +51,53 @@ METHOD_DECLARE(load){
         luaL_error(L, "file not found `%s'", filename);
         return 0;
     }
+    JsonValue** self = (JsonValue**) lua_newuserdata(L, sizeof(JsonValue*) );
 
-    JsonState *state = parse_json(fp);
+    JsonState *state = new JsonState();
+    bool ok = parse_json(fp, state);
+    fclose(fp);
 
-    if( state->value == NULL ){
+    if( not ok ){
         luaL_error(L, "parse error, not a valid JSON file");
         return 0;
     }
 
-    JsonValue** self = (JsonValue**) lua_newuserdata(L, sizeof(JsonValue*) );
     luaL_getmetatable(L, PACKAGE_NAME_STR);
     lua_setmetatable(L, -2);
-    
-    printf("size : %lu\n", state->objList.size() );
-
-	/*
-    for( auto & val : state->objList ){
-        if ( val->type == 'p' ){
-            delete val.release();
-        }
-    }
-	*/
-
-    fclose(fp);
 
     *self = state->value;
+    
+    /*
+    printf("size : %lu\n", state->objList.size() );
+    printf("%p %p %d\n", state, state->value->root, state->value->isRoot());
+    printf("%p %p\n", *self, (*self)->root->value);
+    */
+
 
     return 1;
 }
 
 METHOD_DECLARE(__gc){
-    //puts("__gc is called");
     JsonValue **self_ = (JsonValue**) luaL_checkudata(L, 1, PACKAGE_NAME_STR);
     JsonValue *self = *self_;
 
-	if ( self->isRoot ){
-		delete self->root;
+
+	if ( self && self->isRoot() ){
+        JsonState * state = self->root;
+        /*
+        puts("__gc is called");
+        printf("%p %p %d\n", state, state->value->root, state->value->isRoot());
+        printf("%p %p\n", self, self->root->value);
+        printf("%lu\n", state->objList.size() );
+        printf("%lu\n", state->strPool.size() );
+
+        */
+        state->free();
+		delete state;
         self_ = 0;
 	}
 
-    return 1;
+    return 0;
 }
 
 METHOD_DECLARE(__index){
@@ -212,7 +221,7 @@ int JsonValue::luaGet(LS){
         case 'a': {
             int index = luaL_checkint(L, 2 ) - LUA_INDEX_BASE;
             JsonArray* arr = (JsonArray*) this;
-            if ( index < 0 || index >= arr->ptrVec.size() ){
+            if ( index < 0 || (size_t) index >= arr->ptrVec.size() ){
                 luaL_error(L, "out of range: [1, %d], %d given",
                     arr->ptrVec.size(), index + 1
                 );
@@ -236,6 +245,20 @@ int JsonValue::luaGet(LS){
             return 0;
     }
     luaL_error(L, "unknown");
+    return 0;
+}
+
+std::unique_ptr<std::string[]> a;
+METHOD_DECLARE(testalloc){
+    printf("%d\n", (bool) a);
+    a.reset( new std::string[100000000] ) ;
+    printf("%d\n", (bool) a);
+    return 0;
+}
+METHOD_DECLARE(testfree){
+    printf("%d\n", (bool) a);
+    a.reset( nullptr );
+    printf("%d\n", (bool) a);
     return 0;
 }
 
@@ -263,6 +286,9 @@ int luaopen_libcjson(LS){
     ADD_METHOD(load);
     ADD_METHOD(totable);
     ADD_METHOD(keys);
+
+    ADD_METHOD(testalloc);
+    ADD_METHOD(testfree);
 
     return 1;
 }

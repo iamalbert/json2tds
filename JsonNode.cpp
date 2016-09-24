@@ -7,7 +7,9 @@ JsonValue::JsonValue(char c) : type(c),
 {
 	//printf("value %c\n", c);
 }
-
+bool JsonValue::isRoot() const {
+    return root->value == this;
+}
 const char * JsonValue::typeString() const {
     switch(type){
         case 'n': return "JsonNumber";
@@ -112,5 +114,12 @@ const char * JsonState::getString( std::string & str ){
 
 //JsonValue *JsonState::getJsonValue() const { return value.get(); }
 
+
 void JsonState::free() {
+    for( auto & v : objList ){
+        delete v;
+        v = nullptr;
+    }
+    objList.clear();
+    objList.shrink_to_fit();
 }

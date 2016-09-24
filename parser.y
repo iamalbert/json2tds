@@ -55,7 +55,6 @@
 
 start: element {
 	state->value = $1;
-	state->value->isRoot = true;
 }
 
 array: T_LEFT_BRAK elements T_RIGHT_BRAK { 
@@ -127,8 +126,7 @@ void yyerror(yyscan_t scanner, JsonState *state, const char * err ) {
 	throw std::runtime_error(msg);
 }
 
-JsonState* parse_json( FILE * fp ){
-    JsonState* state = new JsonState();
+bool parse_json( FILE * fp, JsonState * state ){
     yyscan_t scanner;
 
     yylex_init(&scanner);
@@ -138,15 +136,13 @@ JsonState* parse_json( FILE * fp ){
 		//state.getJsonValue()->print(std::cerr);
 	}catch( std::exception & e ){
         fputs( e.what(), stderr );
-        delete state;
-        state = NULL;
+        return false;
 	}
     yylex_destroy(scanner);
 
-    return state;
+    return true;
 }
-JsonState* parse_json_string( const char * string ){
-    JsonState* state = new JsonState();
+bool parse_json_string( const char * string, JsonState *state ){
     yyscan_t scanner;
     yylex_init(&scanner);
 	try{
@@ -156,10 +152,10 @@ JsonState* parse_json_string( const char * string ){
 		yy_delete_buffer(buffer, scanner);
 	}catch( std::exception & e ){
         fputs( e.what(), stderr );
-        delete state; state = NULL;
+        return false;
 	}
     yylex_destroy(scanner);
 
-    return std::move(state);
+    return true;
 }
 
