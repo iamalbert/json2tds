@@ -157,8 +157,8 @@ null     { TOKEN(T_NULL); };
 ","      { TOKEN(T_COMMA); };
 ":"      { TOKEN(T_COLON); };
 
-[ \t\n\r]+ /* ignore whitespace */;
+[ \n\t\r]+ /* ignore whitespace */;
 
-.       { TOKEN(T_UNIDENTIFY); }
+.       { TOKEN(T_UNKNOWN); }
 
 %%

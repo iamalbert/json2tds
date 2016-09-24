@@ -12,7 +12,7 @@ all: libcjson.so
 
 install: libcjson.so
 	cp $^ $(LIBDIR)
-	cp torch-cjson.lua $(LUADIR)
+	cp luajit-cjson.lua $(LUADIR)
 
 
 libcjson.so: cjson.cpp parser.o token.o JsonNode.o

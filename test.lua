@@ -1,4 +1,4 @@
-JSON = require 'torch-cjson'
+JSON = require 'luajit-cjson'
 print(JSON)
 
 --io.read()
@@ -72,8 +72,9 @@ obj = nil; collectgarbage();
 
 obj = JSON.loads[[
 {"a":1}
-{"a":2, "obj": {} }
 {"a":3, "list":[] }
+[]
+"zxcv"
 ]]
 print(obj)
 

@@ -15,6 +15,11 @@ const char * const PACKAGE = PACKAGE_NAME_STR;
 
 #define METHOD_DECLARE(x) extern "C" int METHOD(x) (LS)
 
+struct JsonData {
+    JsonValue * value;
+    JsonState * state;
+};
+
 
 METHOD_DECLARE(__len){
     JsonValue *self = *(JsonValue**)luaL_checkudata(L, 1, PACKAGE_NAME_STR);

@@ -37,15 +37,12 @@ struct JsonValue {
     char type;
     JsonState *root;
 
-
     JsonValue();
     JsonValue(char);
 
     virtual ~JsonValue() = default;
 
     int toLuaObject(LS);
-
-    int asLuaObject(LS);
     int luaGet(LS);
     int luaLen(LS);
 

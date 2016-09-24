@@ -53,18 +53,12 @@ const char * JsonValue::typeString() const {
         case 's': return "JsonString";
         case 'o': return "JsonObject";
         case 'a': return "JsonArray";
+        case 'x': return "JsonNull";
         default:
                   return "JsonUnknownType";
     }
 }
 
-int JsonValue::asLuaObject(LS) {
-    int old_stack_size = lua_gettop(L);
-    this->toLuaObject(L);
-    int new_stack_size = lua_gettop(L);
-    assert(old_stack_size + 1 == new_stack_size);
-    return 1;
-}
 
 
 ///////////

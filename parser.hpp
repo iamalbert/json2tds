@@ -57,7 +57,7 @@ extern int yydebug;
     T_COMMA = 267,
     T_COLON = 268,
     T_END_OF_FILE = 269,
-    T_UNIDENTIFY = 270
+    T_UNKNOWN = 270
   };
 #endif
 
@@ -69,12 +69,10 @@ union YYSTYPE
 #line 27 "parser.y" /* yacc.c:1909  */
 
     JsonValue * value;
-
     const char* strval;
     double numval;
-    int token;
 
-#line 78 "parser.hpp" /* yacc.c:1909  */
+#line 76 "parser.hpp" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
