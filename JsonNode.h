@@ -106,7 +106,6 @@ struct JsonState {
     ~JsonState() = default;
 
     const char * getString( const char * );
-    const char * getString( std::string & );
 
     template <class T, class... Args> T *newObject(Args && ... args) {
         static_assert(std::is_base_of<JsonValue, T>::value,

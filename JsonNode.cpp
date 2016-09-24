@@ -97,13 +97,6 @@ const char * JsonState::getString( const char * str ){
     //printf("getstring: `%s', %p, %d\n", s.first->data(), (void*)s.first->data(), s.second);
     return s.first->data();
 }
-const char * JsonState::getString( std::string & str ){
-	return getString( str.data() );
-	/*
-	auto s = strPool.insert(str);
-    return &( *s.first );
-	*/
-}
 
 //JsonValue *JsonState::getJsonValue() const { return value.get(); }
 
