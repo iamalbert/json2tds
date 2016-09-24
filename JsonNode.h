@@ -55,7 +55,7 @@ struct JsonValue {
     const char * typeString() const;
 
     template<class T> T* as(){
-        return dynamic_cast<T*>(this);
+        return static_cast<T*>(this);
     }
 
 };
