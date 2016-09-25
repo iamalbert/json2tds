@@ -1627,9 +1627,10 @@ yyreturn:
 
 void yyerror(yyscan_t scanner, JsonState *state, const char * err ) {
 	char msg[BUFSIZ];
-	sprintf(msg, "Line: %d, Token: %s, Error: %s\n", 
+	snprintf(msg, BUFSIZ, "Line: %d, Token: %s, Error: %s", 
 		yyget_lineno(scanner), yyget_text(scanner), err );
     puts(msg);
+    state->free();
 	//throw std::runtime_error(msg);
 }
 
@@ -1637,32 +1638,21 @@ bool parse_json( FILE * fp, JsonState * state ){
     yyscan_t scanner;
 
     yylex_init(&scanner);
-	try{
-		yyset_in( fp, scanner );
-		yyparse(scanner, state);
-		//state.getJsonValue()->print(std::cerr);
-	}catch( std::exception & e ){
-        fputs( e.what(), stderr );
-        return false;
-	}
+    yyset_in( fp, scanner );
+    yyparse(scanner, state);
     yylex_destroy(scanner);
 
-    return true;
+    return state->value != nullptr;
 }
 bool parse_json_string( const char * string, JsonState *state ){
     yyscan_t scanner;
     yylex_init(&scanner);
-	try{
-		YY_BUFFER_STATE buffer = yy_scan_string(string, scanner);
-		yyset_lineno(1, scanner);
-		yyparse(scanner, state);
-		yy_delete_buffer(buffer, scanner);
-	}catch( std::exception & e ){
-        fputs( e.what(), stderr );
-        return false;
-	}
+    YY_BUFFER_STATE buffer = yy_scan_string(string, scanner);
+    yyset_lineno(1, scanner);
+    yyparse(scanner, state);
+    yy_delete_buffer(buffer, scanner);
     yylex_destroy(scanner);
 
-    return true;
+    return state->value != nullptr;
 }
 

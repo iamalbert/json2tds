@@ -1,3 +1,4 @@
+#include <fstream>
 #include "JsonNode.h"
 
 #define STRINGIFY(x) #x
@@ -81,6 +82,35 @@ METHOD_DECLARE(load){
     create(L, state, state->value);
     return 1;
 }
+METHOD_DECLARE(loadl){
+    const char *filename = luaL_checkstring(L, 1);
+
+
+    std::fstream fs { filename, std::fstream::in | std::fstream::binary };
+
+    if ( not fs.good() ){
+        luaL_error(L, "file not found `%s'", filename);
+        return 0;
+    }
+    JsonState *state = new JsonState();
+    JsonArray *array = state->newObject<JsonArray>();
+
+    std::string line;
+    while( std::getline(fs, line) ){
+        bool ok = parse_json_string(line.data(), state);
+        array->ptrVec.push_back( state->value );
+        if( not ok ){
+            luaL_error(L, "parse error, not a valid JSONLine file");
+            return 0;
+        }
+    }
+    array->ptrVec.shrink_to_fit();
+    state->value = array;
+    fs.close();
+
+    create(L, state, state->value);
+    return 1;
+}
 
 METHOD_DECLARE(__len){
     JsonData *self = (JsonData*) luaL_checkudata(L, 1, PACKAGE_NAME_STR);
@@ -137,6 +167,30 @@ METHOD_DECLARE(keys){
 }
 
 
+METHOD_DECLARE(hasKey){
+    JsonData *self = (JsonData*) luaL_checkudata(L, 1, PACKAGE_NAME_STR);
+    JsonValue * value = self->value;
+    if( value->type != 'o' ){
+        luaL_error(L, "expecting JsonObject, %s given", value->typeString() );
+    }
+    JsonState *state = self->state;
+
+    size_t len;
+    const char *cstr = luaL_checklstring(L, 2, &len);
+    //printf("cst: %s\n",  cstr );
+
+    const char *  key = state->searchString(cstr);
+
+    auto & table = value->as<JsonObject>()->ptrTable ;
+
+    if( table.find(key) != table.end() ){
+        lua_pushboolean(L, true);
+    }else{
+        lua_pushboolean(L, false);
+    }
+
+    return 1;
+}
 bool JsonValue::isBaseType() const {
     switch(type){
         case 'n': 
@@ -277,10 +331,12 @@ int luaopen_libcjson(LS){
     lua_setfield(L, -2, "mt");
 
     ADD_METHOD(type);
-    ADD_METHOD(loads);
     ADD_METHOD(load);
+    ADD_METHOD(loads);
+    ADD_METHOD(loadl);
     ADD_METHOD(totable);
     ADD_METHOD(keys);
+    ADD_METHOD(hasKey);
 
     ADD_METHOD(testalloc);
     ADD_METHOD(testfree);

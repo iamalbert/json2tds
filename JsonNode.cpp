@@ -106,6 +106,7 @@ void JsonState::free() {
         delete v;
         v = nullptr;
     }
+    value = nullptr;
     objList.clear();
     objList.shrink_to_fit();
 }

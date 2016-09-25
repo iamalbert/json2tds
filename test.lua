@@ -61,8 +61,7 @@ obj = JSON.loads [[
 }
 ]]
 print(obj)
---print(JSON.keys(obj))
--- print(obj.glossary) --.GlossDiv.GlossList.GlossEntry))
+print(obj.glossary) --.GlossDiv.GlossList.GlossEntry))
 -- print("size", #obj)
 -- print(obj)
 -- for k,v in pairs(obj) do print(k, v) end
@@ -77,5 +76,6 @@ obj = JSON.loads[[
 []
 "zxcv"
 ]]
+print( type(obj) )
 print(obj)
 
