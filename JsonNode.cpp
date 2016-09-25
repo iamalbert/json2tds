@@ -2,13 +2,8 @@
 
 
 JsonValue::JsonValue() : JsonValue('?') {}
-JsonValue::JsonValue(char c) : type(c), 
-    root(nullptr) 
-{
+JsonValue::JsonValue(char c) : type(c){
 	//printf("value %c\n", c);
-}
-bool JsonValue::isRoot() const {
-    return root->value == this;
 }
 int JsonValue::toLuaObject(LS) {
     switch(type){
@@ -88,14 +83,19 @@ JsonBoolean::JsonBoolean(bool b) : JsonValue('b'), value(b) {}
 
 JsonNull::JsonNull() : JsonValue('x') {}
 
-JsonState::JsonState() : value(nullptr) {
+JsonState::JsonState() : value(nullptr), refcnt(1) {
 }
 const char * JsonState::getString( const char * str ){
-	//for( auto & v : strPool ){ std::cout << "g:" << v << " " << &v << "\n"; }
-	//std::cout << std::string(str) << "\n";
 	auto s = strPool.insert(str);
-    //printf("getstring: `%s', %p, %d\n", s.first->data(), (void*)s.first->data(), s.second);
     return s.first->data();
+}
+const char * JsonState::searchString( const char * str ){
+    auto it = strPool.find(str);
+    if( it == strPool.end() ){ 
+        return nullptr;
+    }else{
+        return it->data();
+    }
 }
 
 //JsonValue *JsonState::getJsonValue() const { return value.get(); }

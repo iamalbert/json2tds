@@ -5,6 +5,7 @@ print(JSON)
 print "start"
 
 obj = JSON.load "e.json"
+print("done", type(obj))
 print(#obj)
 --io.read()
 obj = nil; collectgarbage();

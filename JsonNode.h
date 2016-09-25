@@ -35,7 +35,6 @@ union JsonBaseType {
 
 struct JsonValue {
     char type;
-    JsonState *root;
 
     JsonValue();
     JsonValue(char);
@@ -43,11 +42,10 @@ struct JsonValue {
     virtual ~JsonValue() = default;
 
     int toLuaObject(LS);
-    int luaGet(LS);
+    int luaGet(LS, JsonState*);
     int luaLen(LS);
 
     bool isBaseType() const;
-    bool isRoot() const;
 
     const char * typeString() const;
 
@@ -102,10 +100,13 @@ struct JsonState {
     std::vector< JsonValue* > objList;
     std::unordered_set< std::string > strPool;
 
+    size_t refcnt;
+
     JsonState();
     ~JsonState() = default;
 
     const char * getString( const char * );
+    const char * searchString( const char * );
 
     template <class T, class... Args> T *newObject(Args && ... args) {
         static_assert(std::is_base_of<JsonValue, T>::value,
@@ -116,7 +117,6 @@ struct JsonState {
         //auto p = std::unique_ptr<T>( ) ;
         //objList.push_back( std::move(p) );
         T* obj = new T(args...);
-        obj->root = this;
 
         objList.push_back(obj);
 

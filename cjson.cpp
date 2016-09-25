@@ -16,15 +16,33 @@ const char * const PACKAGE = PACKAGE_NAME_STR;
 #define METHOD_DECLARE(x) extern "C" int METHOD(x) (LS)
 
 struct JsonData {
-    JsonValue * value;
+
     JsonState * state;
+    JsonValue * value;
+
+    JsonData(JsonState *s, JsonValue *v) : state(s), value(v) {}
+
+    bool isRoot() const {
+        return value == state->value;
+    }
+    void free() {
+        if( isRoot() ){
+            state->free();
+        }
+    }
 };
 
+void create(LS, JsonState* state, JsonValue * value ){
 
-METHOD_DECLARE(__len){
-    JsonValue *self = *(JsonValue**)luaL_checkudata(L, 1, PACKAGE_NAME_STR);
-    return self->luaLen(L);
+    JsonData* self = (JsonData*) lua_newuserdata(L, sizeof(JsonData) );
+
+    new(self) JsonData(state, value);
+
+    luaL_getmetatable(L, PACKAGE_NAME_STR);
+    lua_setmetatable(L, -2);
+
 }
+
 
 METHOD_DECLARE(loads){
     const char *string = luaL_checkstring(L, 1);
@@ -37,14 +55,7 @@ METHOD_DECLARE(loads){
         return 0;
     }
 
-    JsonValue** self = (JsonValue**) lua_newuserdata(L, sizeof(JsonValue*) );
-    luaL_getmetatable(L, PACKAGE_NAME_STR);
-    lua_setmetatable(L, -2);
-
-    //printf("size : %lu\n", state->objList.size() );
-    *self = state->value;
-
-	// for( auto & v : state->strPool ){ std::cout << "p:" << v << "\n"; }
+    create(L, state, state->value);
     return 1;
 }
 
@@ -56,10 +67,10 @@ METHOD_DECLARE(load){
         luaL_error(L, "file not found `%s'", filename);
         return 0;
     }
-    JsonValue** self = (JsonValue**) lua_newuserdata(L, sizeof(JsonValue*) );
-
     JsonState *state = new JsonState();
+
     bool ok = parse_json(fp, state);
+
     fclose(fp);
 
     if( not ok ){
@@ -67,68 +78,51 @@ METHOD_DECLARE(load){
         return 0;
     }
 
-    luaL_getmetatable(L, PACKAGE_NAME_STR);
-    lua_setmetatable(L, -2);
-
-    *self = state->value;
-    
-    /*
-    printf("size : %lu\n", state->objList.size() );
-    printf("%p %p %d\n", state, state->value->root, state->value->isRoot());
-    printf("%p %p\n", *self, (*self)->root->value);
-    */
-
-
+    create(L, state, state->value);
     return 1;
 }
 
+METHOD_DECLARE(__len){
+    JsonData *self = (JsonData*) luaL_checkudata(L, 1, PACKAGE_NAME_STR);
+    return self->value->luaLen(L);
+}
 METHOD_DECLARE(__gc){
-    JsonValue **self_ = (JsonValue**) luaL_checkudata(L, 1, PACKAGE_NAME_STR);
-    JsonValue *self = *self_;
-
+    JsonData *self = (JsonData*) luaL_checkudata(L, 1, PACKAGE_NAME_STR);
 
 	if ( self && self->isRoot() ){
-        JsonState * state = self->root;
-        /*
-        puts("__gc is called");
-        printf("%p %p %d\n", state, state->value->root, state->value->isRoot());
-        printf("%p %p\n", self, self->root->value);
-        printf("%lu\n", state->objList.size() );
-        printf("%lu\n", state->strPool.size() );
-
-        */
-        state->free();
-		delete state;
-        self_ = 0;
+        self->free();
+        self->~JsonData();
+        delete self->state;
 	}
 
     return 0;
 }
 
 METHOD_DECLARE(__index){
-    JsonValue *self = *(JsonValue**)luaL_checkudata(L, 1, PACKAGE_NAME_STR);
+    JsonData *self = (JsonData*) luaL_checkudata(L, 1, PACKAGE_NAME_STR);
 
-    return self->luaGet(L);
+    return self->value->luaGet(L, self->state);
 }
 METHOD_DECLARE(type){
-    JsonValue *self = *(JsonValue**)luaL_checkudata(L, 1, PACKAGE_NAME_STR);
+    JsonData *self = (JsonData*) luaL_checkudata(L, 1, PACKAGE_NAME_STR);
 
-    lua_pushstring(L, self->typeString() ) ; 
+    lua_pushstring(L, self->value->typeString() ) ; 
 
     return 1;
 }
 METHOD_DECLARE(totable){
-    //puts("__totable is called");
-    JsonValue *self = *(JsonValue**)luaL_checkudata(L, 1, PACKAGE_NAME_STR);
-    return self->toLuaObject(L);
+    JsonData *self = (JsonData*) luaL_checkudata(L, 1, PACKAGE_NAME_STR);
+    return self->value->toLuaObject(L);
 }
 METHOD_DECLARE(keys){
-    JsonValue *self = *(JsonValue**)luaL_checkudata(L, 1, PACKAGE_NAME_STR);
-    if( self->type != 'o' ){
-        luaL_error(L, "expecting JsonObject, %s given", self->typeString() );
+    JsonData *self = (JsonData*) luaL_checkudata(L, 1, PACKAGE_NAME_STR);
+    JsonValue * value = self->value;
+
+    if( value->type != 'o' ){
+        luaL_error(L, "expecting JsonObject, %s given", value->typeString() );
     }
 
-    auto & table = self->as<JsonObject>()->ptrTable ;
+    auto & table = value->as<JsonObject>()->ptrTable ;
     int i = table.size();
 
     lua_newtable(L);
@@ -185,7 +179,7 @@ int JsonValue::luaLen(LS){
     luaL_error(L, "unknown");
     return 0;
 }
-int JsonValue::luaGet(LS){
+int JsonValue::luaGet(LS, JsonState * state){
 
 	//puts("called");
     switch(type){
@@ -202,7 +196,7 @@ int JsonValue::luaGet(LS){
             const char *cstr = luaL_checklstring(L, 2, &len);
 			//printf("cst: %s\n",  cstr );
 
-            const char *  key = root->getString(cstr);
+            const char *  key = state->searchString(cstr);
 
 			//printf("key: %p\n", key);
 
@@ -217,10 +211,7 @@ int JsonValue::luaGet(LS){
                 if( ele->isBaseType() ){
                     return ele->toLuaObject(L);
                 }else{
-                    JsonValue** p = (JsonValue**) lua_newuserdata(L, sizeof(JsonValue*) );
-                    *p = ele;
-                    luaL_getmetatable(L, PACKAGE_NAME_STR);
-                    lua_setmetatable(L, -2);
+                    create(L, state, ele );
                     return 1;
                 }
             }
@@ -238,10 +229,7 @@ int JsonValue::luaGet(LS){
                 if( ele->isBaseType() ){
                     return ele->toLuaObject(L);
                 }else{
-                    JsonValue** p = (JsonValue**) lua_newuserdata(L, sizeof(JsonValue*) );
-                    *p = ele;
-                    luaL_getmetatable(L, PACKAGE_NAME_STR);
-                    lua_setmetatable(L, -2);
+                    create(L, state, ele );
                     return 1;
                 }
             }
